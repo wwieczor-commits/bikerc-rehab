@@ -7,26 +7,31 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="BikeRc Rehab">
-<meta name="theme-color" content="#0b0e13">
+<meta name="theme-color" content="#222121">
 <title>BikeRc Rehab</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Crect width=%2264%22 height=%2264%22 rx=%2214%22 fill=%22%232b2a2a%22/%3E%3Ctext x=%2232%22 y=%2245%22 font-family=%22Arial%22 font-weight=%22900%22 font-style=%22italic%22 font-size=%2236%22 fill=%22%232ec4b6%22 text-anchor=%22middle%22%3EB%3C/text%3E%3C/svg%3E">
 <style>
 /* =========================================================
    KOLORYSTYKA – podmień tutaj na barwy BikeRc
    ========================================================= */
 :root{
-  --bg:#0b0e13;
-  --panel:#131820;
-  --panel2:#1a212c;
-  --line:#263041;
-  --text:#e8edf4;
-  --muted:#8b97a8;
-  --accent:#ff5a1f;
-  --accent-soft:rgba(255,90,31,.14);
-  --ok:#22c55e;
-  --warn:#f59e0b;
-  --bad:#ef4444;
-  --left:#38bdf8;
-  --right:#f472b6;
+  --bg:#222121;          /* tło – grafit z logo */
+  --panel:#2b2a2a;       /* kolor tła logo BikeRc */
+  --panel2:#353434;
+  --line:#454343;
+  --text:#f2f2f2;
+  --muted:#a3a09f;
+  --accent:#2ec4b6;      /* morski z logo BikeRc */
+  --accent-ink:#0f2e2b;  /* tekst na morskim przycisku */
+  --accent-print:#1fa597;/* morski w raporcie (białe tło) */
+  --accent-soft:rgba(46,196,182,.15);
+  --ok:#4ade80;
+  --warn:#fbbf24;
+  --bad:#f87171;
+  --left:#60a5fa;        /* noga lewa */
+  --right:#fb923c;       /* noga prawa */
+  --left-print:#1d6fd8;
+  --right-print:#d9620f;
   --font:-apple-system,BlinkMacSystemFont,'SF Pro Text','Inter',system-ui,'Segoe UI',Roboto,Arial,sans-serif;
   --safe-b:env(safe-area-inset-bottom,0px);
   --safe-t:env(safe-area-inset-top,0px);
@@ -43,12 +48,10 @@ select:focus,input:focus,textarea:focus{border-color:var(--accent)}
 textarea{min-height:90px;resize:vertical}
 
 /* ---------- górny pasek ---------- */
-header.top{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:10px;padding:calc(var(--safe-t) + 8px) 14px 8px;background:rgba(11,14,19,.92);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
-.logo{display:flex;align-items:center;gap:8px;color:var(--text)}
-.logo svg{width:32px;height:32px}
-.logo .word{font-weight:800;font-size:20px;letter-spacing:-.4px}
-.logo .word b{color:var(--accent)}
-.logo .sub{display:block;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-weight:600;margin-top:-3px}
+header.top{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:10px;padding:calc(var(--safe-t) + 8px) 14px 8px;background:rgba(34,33,33,.92);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.logo{display:flex;flex-direction:column;align-items:flex-start;gap:2px;color:var(--text)}
+.logo .wm{height:24px;width:auto;display:block}
+.logo .sub{display:block;font-size:9px;letter-spacing:2.4px;text-transform:uppercase;color:var(--muted);font-weight:600;padding-left:2px}
 .sp{flex:1}
 .pill{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;background:var(--panel2);border:1px solid var(--line);font-size:12px;color:var(--muted);max-width:52vw;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 .pill .dot{flex:none;width:8px;height:8px;border-radius:50%;background:var(--muted)}
@@ -72,7 +75,7 @@ header.top{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:
 .badge.recb{right:8px;background:var(--bad);display:none}
 .badge.recb.on{display:block;animation:blink 1.2s infinite}
 .live{position:absolute;left:8px;right:8px;bottom:8px;display:flex;gap:6px;justify-content:center;pointer-events:none}
-.live .lv{background:rgba(10,14,20,.78);border-radius:9px;padding:3px 8px;font-size:12px;font-weight:700;display:flex;gap:6px;align-items:baseline}
+.live .lv{background:rgba(34,33,33,.82);border-radius:9px;padding:3px 8px;font-size:12px;font-weight:700;display:flex;gap:6px;align-items:baseline}
 .live .lv small{color:var(--muted);font-weight:600;font-size:10px;text-transform:uppercase}
 .filebar{display:none;gap:8px;align-items:center;padding:6px 10px;background:var(--panel)}
 .filebar.on{display:flex}
@@ -82,7 +85,7 @@ header.top{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:
 .btn{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:11px 14px;cursor:pointer;font-weight:650;white-space:nowrap;min-height:44px;display:inline-flex;align-items:center;justify-content:center;gap:6px}
 .btn:active{transform:scale(.97)}
 .btn:disabled{opacity:.4}
-.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
 .btn.rec.on{background:var(--bad);border-color:var(--bad);color:#fff}
 .btn.small{min-height:36px;padding:7px 11px;font-size:14px}
 .btn.icon{width:44px;padding:0}
@@ -105,7 +108,7 @@ details.card[open] summary{margin-bottom:10px}
 .testdesc b{color:var(--text)}
 .seg{display:flex;background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:3px}
 .seg button{flex:1;background:none;border:0;padding:9px 8px;border-radius:8px;color:var(--muted);font-weight:650;min-height:40px}
-.seg button.on{background:var(--accent);color:#fff}
+.seg button.on{background:var(--accent);color:var(--accent-ink)}
 .set{display:grid;gap:12px}
 .set label.f{display:flex;flex-direction:column;gap:5px;font-size:13px;color:var(--muted)}
 .tog{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:15px;min-height:40px}
@@ -130,7 +133,7 @@ details.card[open] summary{margin-bottom:10px}
 .hv.R{border-left:4px solid var(--right)}
 .hv.S{grid-column:1/-1;border-left:4px solid var(--accent)}
 .bar{position:relative;height:6px;border-radius:4px;background:var(--line);margin-top:4px;overflow:hidden}
-.bar i{position:absolute;top:0;bottom:0;background:rgba(34,197,94,.35)}
+.bar i{position:absolute;top:0;bottom:0;background:rgba(46,196,182,.4)}
 .bar b{position:absolute;top:-2px;width:3px;height:10px;background:var(--text);border-radius:2px}
 .reps{display:flex;gap:16px;align-items:center;font-size:13px;color:var(--muted);margin-top:8px;padding:8px 10px;background:var(--panel2);border-radius:10px}
 .reps b{color:var(--text);font-size:22px}
@@ -163,7 +166,7 @@ table.m td small{color:var(--muted);font-size:11px}
 .btnrow{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 
 /* ---------- dolne menu ---------- */
-nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:30;display:grid;grid-template-columns:repeat(5,1fr);background:rgba(19,24,32,.95);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-top:1px solid var(--line);padding-bottom:var(--safe-b)}
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:30;display:grid;grid-template-columns:repeat(5,1fr);background:rgba(43,42,42,.96);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-top:1px solid var(--line);padding-bottom:var(--safe-b)}
 nav.tabs button{background:none;border:0;height:var(--tabh);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--muted);font-size:10.5px;font-weight:600}
 nav.tabs button svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 nav.tabs button.on{color:var(--accent)}
@@ -195,9 +198,9 @@ nav.tabs button.on{color:var(--accent)}
 }
 
 /* ---------- raport (jasny dokument) ---------- */
-#report{background:#fff;color:#1b2430;border-radius:12px;padding:18px;margin-top:10px;font-size:13px}
+#report{background:#fff;color:#222121;border-radius:12px;padding:18px;margin-top:10px;font-size:13px}
 #report h1{font-size:18px;margin:0}
-#report h3{font-size:12.5px;text-transform:uppercase;letter-spacing:1px;color:#5b6676;border-bottom:2px solid var(--accent);padding-bottom:4px;margin:20px 0 8px}
+#report h3{font-size:12.5px;text-transform:uppercase;letter-spacing:1px;color:#5b6676;border-bottom:2px solid var(--accent-print);padding-bottom:4px;margin:20px 0 8px}
 #report .tw{overflow-x:auto;-webkit-overflow-scrolling:touch}
 #report table{width:100%;border-collapse:collapse;font-size:12.5px}
 #report th,#report td{border-bottom:1px solid #e3e7ec;padding:6px;text-align:right}
@@ -205,6 +208,8 @@ nav.tabs button.on{color:var(--accent)}
 #report th{background:#f4f6f8;font-weight:600;color:#475263}
 #report .rh{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px;border-bottom:1px solid #e3e7ec;padding-bottom:12px}
 #report .rh .logo{color:#1b2430}
+#report .rh .logo .wm{height:30px}
+#report .rh .logo .wm path{fill:var(--accent-print)}
 #report .kv{display:grid;grid-template-columns:repeat(2,1fr);gap:6px 14px}
 #report .kv div span{display:block;color:#7a8594;font-size:10.5px;text-transform:uppercase;letter-spacing:.7px}
 #report .tag{display:inline-block;padding:2px 7px;border-radius:6px;font-size:11.5px;font-weight:600;white-space:nowrap}
@@ -218,7 +223,7 @@ nav.tabs button.on{color:var(--accent)}
 #report .chartimg{width:100%;border:1px solid #e3e7ec;border-radius:8px}
 #report .note{white-space:pre-wrap;background:#f6f7f9;border-radius:8px;padding:10px}
 #report .disc{font-size:10.5px;color:#7a8594;margin-top:18px}
-#report .cL{color:#0284c7} #report .cR{color:#db2777}
+#report .cL{color:var(--left-print)} #report .cR{color:var(--right-print)}
 @media (min-width:600px){ #report .kv{grid-template-columns:repeat(3,1fr)} #report .imgs{grid-template-columns:repeat(3,1fr)} #report{padding:28px} }
 
 @media print{
@@ -240,15 +245,8 @@ nav.tabs button.on{color:var(--accent)}
 
 <template id="logoTpl">
   <span class="logo">
-    <svg viewBox="0 0 48 48" aria-hidden="true">
-      <circle cx="24" cy="24" r="20" fill="none" stroke="var(--accent)" stroke-width="3.5"/>
-      <circle cx="24" cy="24" r="4" fill="var(--accent)"/>
-      <g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" opacity=".85">
-        <line x1="24" y1="24" x2="24" y2="6"/><line x1="24" y1="24" x2="39.6" y2="33"/><line x1="24" y1="24" x2="8.4" y2="33"/>
-      </g>
-      <path d="M9 13 A20 20 0 0 1 20 4.4" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/>
-    </svg>
-    <span><span class="word">Bike<b>Rc</b></span><span class="sub">Rehab · Motion Lab</span></span>
+    <svg class="wm" viewBox="126 229 600 150" role="img" aria-label="BikeRc"><path fill="var(--accent)" d="M 163.6 351.2 L 171.6 313.3 L 195.5 313.3 C 210 313.3 219.3 315.9 215.8 332.2 C 212.3 348.6 201.9 351.2 187.4 351.2 Z M 176.7 289.6 L 183.8 256 L 207.7 256 C 220.6 256 226.5 261.4 224.1 272.8 C 221.7 284.3 213.4 289.6 200.6 289.6 Z M 181.8 374.9 C 203.4 376.5 241.1 366.2 247.1 338 C 251.6 317 240.8 304.6 223.7 300.9 L 223.7 300.5 C 238.9 295.7 252.1 284.9 255.4 269.3 C 261.4 241.4 237.6 230.8 211.8 232.3 L 158.3 232.3 L 127.9 374.9 Z M 271.7 275.8 L 250.6 374.9 L 280.2 374.9 L 301.3 275.8 Z M 280 232.3 L 274.6 257.8 L 306.1 257.8 L 311.5 232.3 Z M 357.8 232.3 L 328.2 232.3 L 297.8 374.9 L 327.5 374.9 L 338.9 321 L 339.4 320.6 L 357.7 374.9 L 392.2 374.9 L 368 318 L 411.4 274.6 L 378.4 274.6 L 340.3 316.3 L 340 315.9 Z M 498.9 333.2 C 500.3 326.7 501.6 320.4 502.1 314.3 C 502.7 308 502.6 302 501 296.5 C 496.4 279.1 482.4 272.8 463.8 272.8 C 433.6 272.8 411.3 295.7 405 325.5 C 397.9 358.7 407.5 377.9 441.4 377.9 C 464.5 377.9 485.4 369.8 493.2 345.3 L 466.5 345.3 C 461.8 354.4 455.9 358.1 445.6 358.1 C 430.4 358.1 431.2 346.1 433.9 333.2 Z M 438.1 313.5 C 440.8 302.6 446 292.6 459.6 292.6 C 474 292.6 474.8 302.6 472.5 313.5 Z M 555.5 256 L 581.1 256 C 594.5 256.2 601.3 261.5 598.7 274.1 C 596 286.7 586.6 293.3 573.2 293.5 L 547.5 293.5 Z M 542.4 317.2 L 574.8 317.2 C 584.8 317.6 584.5 328.5 583.6 336.5 C 582.2 349.4 580.9 362.2 580.7 374.9 L 614.5 374.9 C 610.4 367 612.8 350.1 613.4 341 C 615 321.2 618.1 306.8 595.2 304.2 L 595.3 303.8 C 613.6 300.1 628.3 287.9 632.2 269.4 C 638.4 240.4 615 232.5 590.6 232.3 L 529.9 232.3 L 499.6 374.9 L 530.2 374.9 Z M 719.5 310.5 C 724.6 287.2 708.9 272.8 683.7 272.8 C 654.3 272.8 633.9 299.1 628.3 325.3 C 622.7 351.6 631.9 377.9 661.3 377.9 C 688.6 377.9 707.1 364 713.4 338.8 L 684.6 338.8 C 682.7 346.9 676.9 358.1 665.5 358.1 C 652.9 358.1 658 333 659.1 324 C 661.2 316.3 666.4 292.6 679.1 292.6 C 690.5 292.6 691.8 302.4 690.2 310.5 Z M 719.5 310.5 "/></svg>
+    <span class="sub">Rehab · Motion Lab</span>
   </span>
 </template>
 
@@ -336,7 +334,7 @@ nav.tabs button.on{color:var(--accent)}
       <h2>Wykres</h2>
       <select id="chartSel"></select>
       <div class="chartbox"><canvas id="chart"></canvas></div>
-      <div class="legend"><span><i style="background:var(--left)"></i>Lewa</span><span><i style="background:var(--right)"></i>Prawa</span><span><i style="background:var(--accent)"></i>Jedna wartość</span><span><i style="background:rgba(34,197,94,.45);height:8px"></i>Norma</span></div>
+      <div class="legend"><span><i style="background:var(--left)"></i>Lewa</span><span><i style="background:var(--right)"></i>Prawa</span><span><i style="background:var(--accent)"></i>Jedna wartość</span><span><i style="background:rgba(46,196,182,.4);height:8px"></i>Norma</span></div>
       <p class="muted" id="chartInfo" style="font-size:12px;margin:8px 0 0">Podgląd na żywo – ostatnie 10 s</p>
     </div>
     <div class="card">
@@ -803,7 +801,7 @@ function draw(w,h){
     ctx.font = `700 ${fs}px ${font}`; const tw = ctx.measureText(txt).width, pad=6*sc;
     let x = p.x + dx*sc; const y = p.y + dy*sc;
     x = Math.max(4, Math.min(w - tw - pad*2 - 4, x));
-    ctx.fillStyle='rgba(10,14,20,.82)'; rrect(ctx, x, y-fs, tw+pad*2, fs+pad*1.4, 6*sc); ctx.fill();
+    ctx.fillStyle='rgba(34,33,33,.85)'; rrect(ctx, x, y-fs, tw+pad*2, fs+pad*1.4, 6*sc); ctx.fill();
     ctx.fillStyle=c; ctx.fillRect(x, y-fs, 3*sc, fs+pad*1.4);
     ctx.fillStyle='#fff'; ctx.fillText(txt, x+pad, y+pad*.1);
   };
@@ -1006,7 +1004,7 @@ function drawChart(target, opts={}){
   const g = c.getContext('2d'); g.setTransform(dpr,0,0,dpr,0,0);
   const light = !!opts.light;
   const C = { bg: light?'#fff':css('--panel'), grid: light?'#e3e7ec':css('--line'), txt: light?'#5b6676':css('--muted'),
-              L: light?'#0284c7':css('--left'), R: light?'#db2777':css('--right'), S: css('--accent') };
+              L: css(light?'--left-print':'--left'), R: css(light?'--right-print':'--right'), S: css(light?'--accent-print':'--accent') };
   g.fillStyle = C.bg; g.fillRect(0,0,W,H);
   let data, t0 = 0;
   const sess = opts.session || (!recording && lastSession ? lastSession : null);
@@ -1025,7 +1023,7 @@ function drawChart(target, opts={}){
   if(tmax-tmin < 1) tmax = tmin+1;
   const ml=40, mr=10, mt=10, mb=24, pw=W-ml-mr, ph=H-mt-mb;
   const xs = t => ml + (t-tmin)/(tmax-tmin)*pw, ys = v => mt + (1-(v-vmin)/(vmax-vmin))*ph;
-  if(n){ const lo = n.lo ?? vmin, hi = n.hi ?? vmax; g.fillStyle='rgba(34,197,94,.14)'; g.fillRect(ml, ys(hi), pw, ys(lo)-ys(hi)); }
+  if(n){ const lo = n.lo ?? vmin, hi = n.hi ?? vmax; g.fillStyle='rgba(46,196,182,.16)'; g.fillRect(ml, ys(hi), pw, ys(lo)-ys(hi)); }
   g.font = '11px ' + css('--font'); g.fillStyle=C.txt; g.strokeStyle=C.grid; g.lineWidth=1;
   const vstep = (vmax-vmin) > 120 ? 30 : (vmax-vmin) > 60 ? 20 : 10;
   g.textAlign='right'; g.textBaseline='middle';
@@ -1176,7 +1174,7 @@ function buildReport(h, fromHist){
     const c = document.createElement('canvas');
     chartImg = T.primary.filter(m=>METRICS[m].view===sess.view).slice(0,2).map(m => {
       drawChart(c, {metric:m, session:sess, w:800, h:240, dpr:2, light:true});
-      return `<p style="margin:10px 0 4px;font-weight:600">${METRICS[m].name} <span style="font-weight:400;color:#7a8594">(<span class="cL">lewa</span>, <span class="cR">prawa</span>, zielone = norma)</span></p><img class="chartimg" src="${c.toDataURL('image/png')}" alt="">`;
+      return `<p style="margin:10px 0 4px;font-weight:600">${METRICS[m].name} <span style="font-weight:400;color:#7a8594">(<span class="cL">lewa</span>, <span class="cR">prawa</span>, tło morskie = norma)</span></p><img class="chartimg" src="${c.toDataURL('image/png')}" alt="">`;
     }).join('');
   }
 
