@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="BikeRc Rehab">
 <meta name="theme-color" content="#222121">
-<title>BikeRc Rehab</title>
+<title>BikeRc Motion Lab</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Crect width=%2264%22 height=%2264%22 rx=%2214%22 fill=%22%232b2a2a%22/%3E%3Ctext x=%2232%22 y=%2245%22 font-family=%22Arial%22 font-weight=%22900%22 font-style=%22italic%22 font-size=%2236%22 fill=%22%232ec4b6%22 text-anchor=%22middle%22%3EB%3C/text%3E%3C/svg%3E">
 <style>
 /* =========================================================
@@ -42,13 +42,13 @@ html,body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font
 body{padding-bottom:calc(var(--tabh) + var(--safe-b) + 12px)}
 button,select,input,textarea{font:inherit;color:inherit}
 /* 16px w polach – Safari nie przybliża wtedy ekranu */
-select,input[type=text],input[type=date],textarea{font-size:16px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;outline:none;width:100%;-webkit-appearance:none;appearance:none}
+select,input[type=text],input[type=date],input[type=number],textarea{font-size:16px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;outline:none;width:100%;-webkit-appearance:none;appearance:none}
 select{background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);background-position:calc(100% - 18px) 55%,calc(100% - 13px) 55%;background-size:5px 5px;background-repeat:no-repeat;padding-right:32px}
 select:focus,input:focus,textarea:focus{border-color:var(--accent)}
 textarea{min-height:90px;resize:vertical}
 
 /* ---------- górny pasek ---------- */
-header.top{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:10px;padding:calc(var(--safe-t) + 8px) 14px 8px;background:rgba(34,33,33,.92);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+header.top{position:sticky;top:0;z-index:20;display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;padding:calc(var(--safe-t) + 8px) 14px 8px;background:rgba(34,33,33,.92);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
 .logo{display:flex;flex-direction:column;align-items:flex-start;gap:2px;color:var(--text)}
 .logo .wm{height:24px;width:auto;display:block}
 .logo .sub{display:block;font-size:9px;letter-spacing:2.4px;text-transform:uppercase;color:var(--muted);font-weight:600;padding-left:2px}
@@ -60,8 +60,18 @@ header.top{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:
 .pill.err .dot{background:var(--bad)}
 @keyframes blink{50%{opacity:.3}}
 
+/* ---------- przełącznik trybu ---------- */
+.modebar{flex:1 0 100%;display:grid;grid-template-columns:1fr 1fr;gap:4px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:4px}
+.modebar button{display:flex;align-items:center;justify-content:center;gap:8px;min-height:46px;border:0;border-radius:10px;background:none;color:var(--muted);font-weight:750;font-size:16px;letter-spacing:.2px}
+.modebar button svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.modebar button.on{background:var(--accent);color:var(--accent-ink);box-shadow:0 2px 10px rgba(46,196,182,.25)}
+body[data-mode=rehab] .only-bike, body[data-mode=bike] .only-rehab{display:none!important}
+.hv .big .u{font-size:16px;font-weight:600;color:var(--muted);margin-left:2px}
+.cycinfo{font-size:12px;color:var(--muted);margin-top:8px}
+@media (orientation:landscape) and (max-height:560px){ .modebar button{min-height:36px;font-size:14px} }
+
 /* ---------- obraz ---------- */
-.stageWrap{position:sticky;top:calc(var(--safe-t) + 53px);z-index:10;background:#000}
+.stageWrap{position:sticky;top:var(--hdrh,110px);z-index:10;background:#000}
 .stage{position:relative;display:flex;justify-content:center;align-items:center;min-height:200px;background:#000}
 .stage canvas{display:block;max-width:100%;max-height:52vh;max-height:52svh;width:auto;height:auto}
 /* iOS nie dekoduje klatek ukrytego wideo – trzymamy je w DOM, ale niewidoczne */
@@ -182,7 +192,7 @@ nav.tabs button.on{color:var(--accent)}
 @media (orientation:landscape) and (max-height:560px){
   body{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);grid-template-rows:auto 1fr;column-gap:0}
   header.top{grid-column:1/-1}
-  .left{grid-column:1;position:sticky;top:calc(var(--safe-t) + 53px);align-self:start;max-height:calc(100vh - 53px - var(--tabh));overflow:auto}
+  .left{grid-column:1;position:sticky;top:var(--hdrh,110px);align-self:start;max-height:calc(100vh - var(--hdrh,110px) - var(--tabh));overflow:auto}
   .stageWrap{position:static}
   .stage canvas{max-height:calc(100vh - 210px)}
   main{grid-column:2}
@@ -191,7 +201,7 @@ nav.tabs button.on{color:var(--accent)}
 @media (min-width:820px){
   body{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);grid-template-rows:auto 1fr}
   header.top{grid-column:1/-1}
-  .left{grid-column:1;position:sticky;top:61px;align-self:start;padding:12px}
+  .left{grid-column:1;position:sticky;top:var(--hdrh,110px);align-self:start;padding:12px}
   .stageWrap{position:static;border-radius:14px;overflow:hidden}
   .stage canvas{max-height:70vh}
   main{grid-column:2;padding:2px 12px 0 0}
@@ -241,12 +251,12 @@ nav.tabs button.on{color:var(--accent)}
 }
 </style>
 </head>
-<body data-tab="live">
+<body data-tab="live" data-mode="rehab">
 
 <template id="logoTpl">
   <span class="logo">
     <svg class="wm" viewBox="126 229 600 150" role="img" aria-label="BikeRc"><path fill="var(--accent)" d="M 163.6 351.2 L 171.6 313.3 L 195.5 313.3 C 210 313.3 219.3 315.9 215.8 332.2 C 212.3 348.6 201.9 351.2 187.4 351.2 Z M 176.7 289.6 L 183.8 256 L 207.7 256 C 220.6 256 226.5 261.4 224.1 272.8 C 221.7 284.3 213.4 289.6 200.6 289.6 Z M 181.8 374.9 C 203.4 376.5 241.1 366.2 247.1 338 C 251.6 317 240.8 304.6 223.7 300.9 L 223.7 300.5 C 238.9 295.7 252.1 284.9 255.4 269.3 C 261.4 241.4 237.6 230.8 211.8 232.3 L 158.3 232.3 L 127.9 374.9 Z M 271.7 275.8 L 250.6 374.9 L 280.2 374.9 L 301.3 275.8 Z M 280 232.3 L 274.6 257.8 L 306.1 257.8 L 311.5 232.3 Z M 357.8 232.3 L 328.2 232.3 L 297.8 374.9 L 327.5 374.9 L 338.9 321 L 339.4 320.6 L 357.7 374.9 L 392.2 374.9 L 368 318 L 411.4 274.6 L 378.4 274.6 L 340.3 316.3 L 340 315.9 Z M 498.9 333.2 C 500.3 326.7 501.6 320.4 502.1 314.3 C 502.7 308 502.6 302 501 296.5 C 496.4 279.1 482.4 272.8 463.8 272.8 C 433.6 272.8 411.3 295.7 405 325.5 C 397.9 358.7 407.5 377.9 441.4 377.9 C 464.5 377.9 485.4 369.8 493.2 345.3 L 466.5 345.3 C 461.8 354.4 455.9 358.1 445.6 358.1 C 430.4 358.1 431.2 346.1 433.9 333.2 Z M 438.1 313.5 C 440.8 302.6 446 292.6 459.6 292.6 C 474 292.6 474.8 302.6 472.5 313.5 Z M 555.5 256 L 581.1 256 C 594.5 256.2 601.3 261.5 598.7 274.1 C 596 286.7 586.6 293.3 573.2 293.5 L 547.5 293.5 Z M 542.4 317.2 L 574.8 317.2 C 584.8 317.6 584.5 328.5 583.6 336.5 C 582.2 349.4 580.9 362.2 580.7 374.9 L 614.5 374.9 C 610.4 367 612.8 350.1 613.4 341 C 615 321.2 618.1 306.8 595.2 304.2 L 595.3 303.8 C 613.6 300.1 628.3 287.9 632.2 269.4 C 638.4 240.4 615 232.5 590.6 232.3 L 529.9 232.3 L 499.6 374.9 L 530.2 374.9 Z M 719.5 310.5 C 724.6 287.2 708.9 272.8 683.7 272.8 C 654.3 272.8 633.9 299.1 628.3 325.3 C 622.7 351.6 631.9 377.9 661.3 377.9 C 688.6 377.9 707.1 364 713.4 338.8 L 684.6 338.8 C 682.7 346.9 676.9 358.1 665.5 358.1 C 652.9 358.1 658 333 659.1 324 C 661.2 316.3 666.4 292.6 679.1 292.6 C 690.5 292.6 691.8 302.4 690.2 310.5 Z M 719.5 310.5 "/></svg>
-    <span class="sub">Rehab · Motion Lab</span>
+    <span class="sub"><span class="only-rehab">Rehab</span><span class="only-bike">Bike Fit</span> · Motion Lab</span>
   </span>
 </template>
 
@@ -254,6 +264,10 @@ nav.tabs button.on{color:var(--accent)}
   <div id="logoTop"></div>
   <span class="sp"></span>
   <span class="pill" id="status"><span class="dot"></span><span id="statusTxt">Ładowanie…</span></span>
+  <div class="modebar" id="modeBar">
+    <button data-m="rehab" class="on"><svg viewBox="0 0 24 24"><path d="M12 21s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.6-7 10-7 10z"/><path d="M8 12h2l1-2 2 4 1-2h2"/></svg>Rehabilitacja</button>
+    <button data-m="bike"><svg viewBox="0 0 24 24"><circle cx="5.5" cy="16.5" r="3.5"/><circle cx="18.5" cy="16.5" r="3.5"/><path d="M5.5 16.5 9 9h6l3.5 7.5M9 9 12 16.5h-1M15 9l-1.5-3H16"/></svg>Bike fitting</button>
+  </div>
 </header>
 
 <!-- ============ OBRAZ + STEROWANIE ============ -->
@@ -262,7 +276,7 @@ nav.tabs button.on{color:var(--accent)}
     <div class="stage" id="stage">
       <video id="video" playsinline webkit-playsinline muted autoplay></video>
       <canvas id="view" width="720" height="405"></canvas>
-      <div class="ph" id="ph"><strong>Uruchom kamerę</strong><span>albo wczytaj nagranie z galerii.<br>Najlepiej telefon na statywie, bokiem do pacjenta, na wysokości kolana.</span></div>
+      <div class="ph" id="ph"><strong>Uruchom kamerę</strong><span class="only-rehab">albo wczytaj nagranie z galerii.<br>Najlepiej telefon na statywie, bokiem do pacjenta, na wysokości kolana.</span><span class="only-bike">albo wczytaj nagranie z galerii.<br>Rower na trenażerze, telefon na statywie prostopadle do roweru, na wysokości siodła. Cały rower i kolarz w kadrze.</span></div>
       <span class="badge fps mono" id="fps">— fps</span>
       <span class="badge cal" id="calBadge">kalibracja 0°</span>
       <span class="badge recb mono" id="recBadge">● REC 0.0 s</span>
@@ -297,6 +311,22 @@ nav.tabs button.on{color:var(--accent)}
       <h2>Test</h2>
       <select id="testSel"></select>
       <div class="testdesc" id="testDesc"></div>
+    </div>
+    <div class="card only-bike">
+      <h2>Rower</h2>
+      <div class="row2">
+        <label class="f">Typ roweru / pozycja
+          <select id="bikeType">
+            <option value="endurance">Szosa – endurance</option>
+            <option value="race">Szosa – wyczynowa / aero</option>
+            <option value="gravel">Gravel</option>
+            <option value="mtb">MTB</option>
+            <option value="tt">Czasówka / triathlon</option>
+            <option value="city">Trekking / miejski</option>
+          </select></label>
+        <label class="f">Długość korby (mm)<input type="number" id="crank" value="172.5" step="2.5" min="140" max="185" inputmode="decimal"></label>
+      </div>
+      <p class="muted" style="font-size:12px;margin:8px 0 0">Długość korby służy do przeliczenia obrazu na milimetry (pozycja kolana nad pedałem, ruch bioder i kolan).</p>
     </div>
     <div class="hero" id="hero"></div>
 
@@ -347,16 +377,21 @@ nav.tabs button.on{color:var(--accent)}
   <!-- PACJENT -->
   <section class="page" id="page-patient">
     <div class="card">
-      <h2>Pacjent</h2>
+      <h2><span class="only-rehab">Pacjent</span><span class="only-bike">Klient / kolarz</span></h2>
       <div class="form">
         <label>Imię i nazwisko<input type="text" id="pName" autocomplete="off"></label>
         <div class="row2">
           <label>Data urodzenia<input type="date" id="pBirth"></label>
-          <label>Strona leczona<select id="pSide"><option value="">—</option><option value="L">Lewa</option><option value="R">Prawa</option><option value="B">Obie</option></select></label>
+          <label class="only-rehab">Strona leczona<select id="pSide"><option value="">—</option><option value="L">Lewa</option><option value="R">Prawa</option><option value="B">Obie</option></select></label>
         </div>
-        <label>Rozpoznanie / uraz<input type="text" id="pDiag" placeholder="np. skręcenie stawu skokowego"></label>
-        <label>Etap rehabilitacji<input type="text" id="pStage" placeholder="np. 6 tydzień po zabiegu"></label>
-        <label>Terapeuta<input type="text" id="pTher"></label>
+        <label class="only-rehab">Rozpoznanie / uraz<input type="text" id="pDiag" placeholder="np. skręcenie stawu skokowego"></label>
+        <label class="only-rehab">Etap rehabilitacji<input type="text" id="pStage" placeholder="np. 6 tydzień po zabiegu"></label>
+        <label class="only-bike">Rower (marka, model, rozmiar)<input type="text" id="bModel" placeholder="np. Canyon Endurace CF 7, rozmiar M"></label>
+        <div class="row2 only-bike">
+          <label>Wysokość siodła (mm)<input type="text" id="bSaddle" inputmode="decimal" placeholder="od osi suportu"></label>
+          <label>Cel / dolegliwości<input type="text" id="bGoal" placeholder="np. ból kolana, maraton"></label>
+        </div>
+        <label><span class="only-rehab">Terapeuta</span><span class="only-bike">Fitter</span><input type="text" id="pTher"></label>
         <label>Wnioski i zalecenia (do raportu)<textarea id="pNotes"></textarea></label>
       </div>
     </div>
@@ -384,9 +419,32 @@ nav.tabs button.on{color:var(--accent)}
 
   <!-- POMOC -->
   <section class="page" id="page-help">
-    <div class="card help">
-      <h2>Ustawienie telefonu</h2>
+    <div class="card help only-bike">
+      <h2>Bike fitting – ustawienie</h2>
       <ul>
+        <li><b>Rower na trenażerze</b>, wypoziomowany. Kolarz w swoich butach i stroju, rozgrzany (2–3 min jazdy).</li>
+        <li><b>Widok z boku:</b> telefon na statywie, prostopadle do roweru, na wysokości siodła, 2,5–3 m od roweru. W kadrze cały kolarz z kierownicą i korbą. Mierzona jest strona bliżej telefonu – potem obróć rower i zmierz drugą.</li>
+        <li><b>Widok z przodu:</b> telefon przed rowerem, na wysokości suportu, w osi roweru. Ocena toru kolan i kołysania miednicy.</li>
+        <li>Wpisz <b>długość korby</b> – na jej podstawie program przelicza obraz na milimetry.</li>
+        <li>Kolarz jedzie równo, 80–95 obr/min, ręce na klamkomanetkach (szosa). Nagrywaj 20–30 s – program uśrednia wszystkie obroty.</li>
+      </ul>
+      <h2>Co jest mierzone</h2>
+      <ul>
+        <li><b>Kolano w dolnym punkcie</b> – najmniejsze zgięcie kolana w obrocie. Najważniejsze dla wysokości siodła (zwykle 30–40°).</li>
+        <li><b>Kolano w górnym punkcie</b> – największe zgięcie (ok. 105–115°).</li>
+        <li><b>Kąt biodra zamknięty</b> – najmniejszy kąt tułów–udo w górze obrotu.</li>
+        <li><b>Kąt biodra otwarty</b> – największy kąt tułów–udo w dole obrotu.</li>
+        <li><b>Tułów do poziomu</b> (linia pleców biodro–bark), <b>kąt barku</b> (tułów–ramię), <b>zgięcie łokcia</b>, <b>nadgarstek</b> (dłoń względem przedramienia) – ocena zasięgu i wysokości kierownicy.</li>
+        <li><b>Głowa / odcinek szyjny</b> – o ile głowa odchyla się od linii pleców (przeprost karku).</li>
+        <li><b>Kręgosłup:</b> z jednej kamery mierzymy jego ustawienie jako linię biodro–bark i odcinek szyjny. Zaokrąglenia pleców (kifozy) model nie widzi, bo nie ma punktów na kręgosłupie – oceń je wzrokowo na zdjęciu w raporcie.</li>
+        <li><b>Kolano względem osi pedału</b> – pozioma odległość środka kolana od osi pedału, gdy korba jest z przodu (pozycja „na 3”). Środek stawu leży ok. 2–3 cm za przednią krawędzią rzepki.</li>
+        <li><b>Praca kostki</b>, <b>kołysanie bioder</b>, <b>kadencja</b>; z przodu: <b>boczny ruch kolan</b> i <b>kołysanie miednicy</b>.</li>
+      </ul>
+      <p>Raport podaje wyniki jako średnią ± odchylenie ze wszystkich obrotów i proponuje zmiany (np. siodło w górę/dół o ok. X mm). To wskazówki – po każdej zmianie zrób ponowny pomiar.</p>
+    </div>
+    <div class="card help">
+      <h2 class="only-rehab">Ustawienie telefonu</h2>
+      <ul class="only-rehab">
         <li><b>Statyw</b> – telefon nie może się ruszać. Użyj tylnej kamery.</li>
         <li><b>Widok z boku</b> (kostka, kolano, biodro, chód): telefon poziomo, na wysokości kolana, 2–3 m od pacjenta, prostopadle do ruchu. Badana noga bliżej telefonu.</li>
         <li><b>Widok z przodu</b> (koślawość kolana, miednica): pacjent przodem, telefon na wysokości kolan.</li>
@@ -406,7 +464,7 @@ nav.tabs button.on{color:var(--accent)}
 <nav class="tabs" id="tabs">
   <button data-t="live" class="on"><svg viewBox="0 0 24 24"><path d="M12 3v4M12 17v4M3 12h4M17 12h4"/><circle cx="12" cy="12" r="5"/></svg>Pomiar</button>
   <button data-t="chart"><svg viewBox="0 0 24 24"><path d="M3 20h18"/><path d="M4 16l5-6 4 3 6-8"/></svg>Wykres</button>
-  <button data-t="patient"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg>Pacjent</button>
+  <button data-t="patient"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg><span class="only-rehab">Pacjent</span><span class="only-bike">Klient</span></button>
   <button data-t="report"><svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h5"/></svg>Raport</button>
   <button data-t="help"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .9-1 1.7M12 17h.01"/></svg>Pomoc</button>
 </nav>
@@ -430,21 +488,42 @@ const SET_KEY = 'bikerc_rehab_mobile_settings_v1';
 const VIS_MIN = 0.45;
 
 const IDX = {
-  L: {sh:11, hip:23, knee:25, ank:27, heel:29, toe:31},
-  R: {sh:12, hip:24, knee:26, ank:28, heel:30, toe:32}
+  L: {ear:7, sh:11, el:13, wr:15, idx:19, hip:23, knee:25, ank:27, heel:29, toe:31},
+  R: {ear:8, sh:12, el:14, wr:16, idx:20, hip:24, knee:26, ank:28, heel:30, toe:32}
 };
 
 const METRICS = {
-  knee:     {name:'Zgięcie kolana',            short:'Kolano',   sides:true,  view:'sag',   hint:'+ zgięcie, − przeprost',      range:[-10,150]},
+  knee:     {name:'Zgięcie kolana',            short:'Kolano',   sides:true,  view:'sag',   hint:'+ zgięcie, − przeprost',      range:[-10,150], modes:['rehab','bike']},
   hip:      {name:'Zgięcie biodra',            short:'Biodro',   sides:true,  view:'sag',   hint:'+ zgięcie, − wyprost',        range:[-30,130]},
-  ankle:    {name:'Staw skokowy',              short:'Kostka',   sides:true,  view:'sag',   hint:'+ grzbietowe, − podeszwowe',  range:[-60,40], signed:true},
+  ankle:    {name:'Staw skokowy',              short:'Kostka',   sides:true,  view:'sag',   hint:'+ grzbietowe, − podeszwowe',  range:[-60,40], signed:true, modes:['rehab','bike']},
   tibia:    {name:'Pochylenie goleni',         short:'Goleń',    sides:true,  view:'sag',   hint:'od pionu, + do przodu',       range:[-20,60], signed:true},
   foot:     {name:'Kąt stopy do podłoża',      short:'Stopa',    sides:true,  view:'sag',   hint:'+ palce w górę',              range:[-60,40], signed:true},
   trunk:    {name:'Pochylenie tułowia',        short:'Tułów',    sides:false, view:'sag',   hint:'od pionu, + do przodu',       range:[-20,80], signed:true},
   fppa:     {name:'Koślawość kolana (FPPA)',   short:'FPPA',     sides:true,  view:'front', hint:'+ koślawość, − szpotawość',   range:[-20,30], signed:true},
-  pelvis:   {name:'Pochylenie miednicy',       short:'Miednica', sides:false, view:'front', hint:'+ lewy talerz niżej',         range:[-15,15], signed:true},
-  trunkLat: {name:'Boczne pochylenie tułowia', short:'Tułów bok',sides:false, view:'front', hint:'+ w lewo, − w prawo',         range:[-20,20], signed:true}
+  pelvis:   {name:'Pochylenie miednicy',       short:'Miednica', sides:false, view:'front', hint:'+ lewy talerz niżej',         range:[-15,15], signed:true, modes:['rehab','bike']},
+  trunkLat: {name:'Boczne pochylenie tułowia', short:'Tułów bok',sides:false, view:'front', hint:'+ w lewo, − w prawo',         range:[-20,20], signed:true},
+  // ---- bike fitting: kąty na żywo ----
+  hipAng:   {name:'Kąt biodra (tułów–udo)',    short:'Biodro',   sides:true,  view:'sag',   hint:'kąt wewnętrzny',              range:[30,140],  modes:['bike']},
+  trunkH:   {name:'Tułów do poziomu',          short:'Tułów',    sides:false, view:'sag',   hint:'0° = poziomo',                range:[0,80],    modes:['bike']},
+  shoulder: {name:'Kąt barku (tułów–ramię)',   short:'Bark',     sides:true,  view:'sag',   hint:'kąt wewnętrzny',              range:[40,130],  modes:['bike']},
+  elbow:    {name:'Zgięcie łokcia',            short:'Łokieć',   sides:true,  view:'sag',   hint:'0° = ramię proste',           range:[0,120],   modes:['bike']},
+  wrist:    {name:'Nadgarstek (dłoń–przedramię)',short:'Nadgarstek',sides:true, view:'sag',   hint:'0° = dłoń w linii przedramienia', range:[0,60], modes:['bike']},
+  neck:     {name:'Głowa / odcinek szyjny',    short:'Szyja',    sides:false, view:'sag',   hint:'odchylenie głowy od linii pleców', range:[0,80], modes:['bike']},
+  // ---- bike fitting: wartości z każdego obrotu korby ----
+  kneeBDC:  {name:'Kolano w dolnym punkcie',   short:'Kolano dół',sides:true, view:'sag',   hint:'najmniejsze zgięcie w obrocie', range:[10,60],  modes:['bike'], cyc:true},
+  kneeTDC:  {name:'Kolano w górnym punkcie',   short:'Kolano góra',sides:true,view:'sag',   hint:'największe zgięcie w obrocie',  range:[80,140], modes:['bike'], cyc:true},
+  hipClosed:{name:'Kąt biodra zamknięty',      short:'Biodro min',sides:true, view:'sag',   hint:'najmniejszy kąt tułów–udo',     range:[20,80],  modes:['bike'], cyc:true},
+  hipOpen:  {name:'Kąt biodra otwarty',        short:'Biodro maks',sides:true,view:'sag',   hint:'największy kąt tułów–udo',      range:[70,140], modes:['bike'], cyc:true},
+  ankleROM: {name:'Praca kostki w obrocie',    short:'Kostka',   sides:true,  view:'sag',   hint:'zakres ruchu stopy',            range:[0,50],   modes:['bike'], cyc:true},
+  kops:     {name:'Kolano względem osi pedału',short:'Kolano–pedał',sides:true,view:'sag',  hint:'korba z przodu; + przed osią',  range:[-80,40], modes:['bike'], cyc:true, unit:'mm', signed:true},
+  hipBob:   {name:'Kołysanie bioder w pionie', short:'Biodra',   sides:false, view:'sag',   hint:'ruch góra–dół w obrocie',       range:[0,40],   modes:['bike'], cyc:true, unit:'mm'},
+  kneeTravel:{name:'Boczny ruch kolana',       short:'Kolano bok',sides:true, view:'front', hint:'zakres ruchu na boki',          range:[0,50],   modes:['bike'], cyc:true, unit:'mm'},
+  pelvisRock:{name:'Kołysanie miednicy',       short:'Miednica', sides:false, view:'front', hint:'zakres przechyłu w obrocie',    range:[0,15],   modes:['bike'], cyc:true},
+  cadence:  {name:'Kadencja',                  short:'Kadencja', sides:false, view:'*',     hint:'obroty korby na minutę',        range:[40,130], modes:['bike'], cyc:true, unit:'obr/min'}
 };
+const modesOf = k => METRICS[k].modes || ['rehab'];
+const keysFor = (v, m) => Object.keys(METRICS).filter(k => modesOf(k).includes(m) && (METRICS[k].view===v || METRICS[k].view==='*'));
+const BIKE_TYPES = {endurance:'Szosa – endurance', race:'Szosa – wyczynowa / aero', gravel:'Gravel', mtb:'MTB', tt:'Czasówka / triathlon', city:'Trekking / miejski'};
 const CAL_KEYS = ['ankle','foot','pelvis','trunkLat'];
 
 const TESTS = {
@@ -490,8 +569,36 @@ const TESTS = {
       {m:'ankle', stat:'min', lo:-30, hi:-10, label:'Maks. zgięcie podeszwowe', ref:'ok. 15–20°'},
       {m:'hip', stat:'max', lo:20, hi:40, label:'Maks. zgięcie biodra', ref:'ok. 30°'},
       {m:'hip', stat:'min', lo:-25, hi:-3, label:'Maks. wyprost biodra', ref:'ok. 10–15°'}
+    ]},
+
+  // ================= BIKE FITTING =================
+  bikeSide: {mode:'bike', name:'Fitting – widok z boku', view:'sag', cycles:true, primary:['kneeBDC','kneeTDC','hipClosed','trunkH'], peak:{m:'knee', dir:-1},
+    desc:'<b>Ustawienie:</b> rower na trenażerze, telefon prostopadle do roweru na wysokości siodła. Kolarz jedzie równo 80–95 obr/min. Nagrywaj 20–30 s – wynik to średnia ze wszystkich obrotów. Mierzona jest noga bliżej telefonu; potem obróć rower i zmierz drugą stronę.',
+    norms:[
+      {m:'kneeBDC', stat:'mean', lo:30, hi:40, label:'Zgięcie kolana w dolnym punkcie', ref:'30–40° (pomiar dynamiczny)'},
+      {m:'kneeTDC', stat:'mean', lo:100, hi:118, label:'Zgięcie kolana w górnym punkcie', ref:'ok. 105–115°'},
+      {m:'hipClosed', stat:'mean', lo:45, label:'Kąt biodra zamknięty (góra obrotu)', ref:'≥ 45°', t:{tt:{lo:38, ref:'≥ 40° w pozycji aero'}}},
+      {m:'hipOpen', stat:'mean', lo:90, hi:125, label:'Kąt biodra otwarty (dół obrotu)', ref:'ok. 95–115°'},
+      {m:'trunkH', stat:'mean', lo:38, hi:50, label:'Tułów do poziomu', ref:'endurance 40–50°',
+        t:{race:{lo:28,hi:42,ref:'wyczynowa 30–40°'}, gravel:{lo:38,hi:52,ref:'gravel 40–50°'}, mtb:{lo:40,hi:58,ref:'MTB 40–55°'}, tt:{lo:5,hi:25,ref:'czasówka 10–20°'}, city:{lo:50,hi:80,ref:'trekking 55–75°'}}},
+      {m:'shoulder', stat:'mean', lo:75, hi:95, label:'Kąt barku (tułów–ramię)', ref:'80–90°', t:{tt:{lo:80,hi:100,ref:'aero ok. 85–95°'}, city:{lo:55,hi:85,ref:'60–80°'}}},
+      {m:'elbow', stat:'mean', lo:10, hi:35, label:'Zgięcie łokcia', ref:'15–30° (łokcie lekko ugięte)', t:{tt:{lo:75,hi:105,ref:'na lemondce ok. 90°'}}},
+      {m:'wrist', stat:'mean', hi:20, warn:30, label:'Ustawienie nadgarstka (dłonie)', ref:'≤ 20° – dłoń w linii przedramienia'},
+      {m:'neck', stat:'mean', hi:40, warn:50, label:'Głowa / odcinek szyjny', ref:'≤ 40°; więcej = przeprost karku'},
+      {m:'kops', stat:'mean', lo:-40, hi:0, label:'Środek kolana względem osi pedału', ref:'0–4 cm za osią (≈ klasyczny KOPS)', t:{tt:{lo:-20,hi:30,ref:'w aero kolano zwykle bardziej z przodu'}}},
+      {m:'ankleROM', stat:'mean', lo:10, hi:30, label:'Praca kostki w obrocie', ref:'15–25°'},
+      {m:'hipBob', stat:'mean', hi:15, warn:25, label:'Kołysanie bioder w pionie', ref:'≤ 15 mm'},
+      {m:'cadence', stat:'mean', lo:70, hi:105, label:'Kadencja w pomiarze', ref:'80–95 obr/min do pomiaru'}
+    ]},
+  bikeFront: {mode:'bike', name:'Fitting – widok z przodu', view:'front', cycles:true, primary:['kneeTravel','pelvisRock','cadence'],
+    desc:'<b>Ustawienie:</b> telefon przed rowerem na wysokości suportu, w osi roweru. Kolarz jedzie równo 80–95 obr/min. Oceniamy tor kolan (czy kolano nie ucieka na boki) i kołysanie miednicy.',
+    norms:[
+      {m:'kneeTravel', stat:'mean', hi:20, warn:30, label:'Boczny ruch kolana', ref:'≤ 20 mm'},
+      {m:'pelvisRock', stat:'mean', hi:5, warn:8, label:'Kołysanie miednicy', ref:'≤ 5°'},
+      {m:'cadence', stat:'mean', lo:70, hi:105, label:'Kadencja w pomiarze', ref:'80–95 obr/min'}
     ]}
 };
+const normFor = (n, type) => (n.t && n.t[type]) ? {...n, ...n.t[type]} : n;
 
 /* =========================================================
    STAN
@@ -506,6 +613,7 @@ let fpsT = performance.now(), fpsN = 0;
 let recording = false, recStart = 0, samples = [], reps = {L:0,R:0}, repState = {L:false,R:false};
 let peaks = {L:null,R:null,S:null}, snapshots = [], lastSnapT = {};
 let measurements = [], liveBuf = [], lastSession = null, wakeLock = null;
+let mode = 'rehab', bikeType = 'endurance', nearCount = {L:0,R:0}, trail = {L:[],R:[]};
 
 /* =========================================================
    POMOCNICZE
@@ -516,7 +624,8 @@ const deg = r => r*180/Math.PI;
 const sub = (a,b) => ({x:a.x-b.x, y:a.y-b.y});
 function angBetween(a,b){ const d=a.x*b.x+a.y*b.y, m=Math.hypot(a.x,a.y)*Math.hypot(b.x,b.y); return m? deg(Math.acos(Math.max(-1,Math.min(1,d/m)))) : null; }
 function signedAng(a,b){ return deg(Math.atan2(a.x*b.y-a.y*b.x, a.x*b.x+a.y*b.y)); }
-const fmt = (v, signed) => v==null||isNaN(v) ? '—' : ((signed && v>0 ? '+' : '') + Math.round(v) + '°');
+const fmt = (v, signed, unit='°') => v==null||isNaN(v) ? '—' : ((signed && v>0 ? '+' : '') + Math.round(v) + (unit==='°' ? '°' : ' '+unit));
+const fk = (k, v, signed) => fmt(v, signed ?? METRICS[k].signed, METRICS[k].unit || '°');
 const fmt1 = v => v==null||isNaN(v) ? '—' : (Math.round(v*10)/10).toFixed(1);
 const esc = s => String(s??'').replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const sidesOf = k => METRICS[k].sides ? ['L','R'] : ['S'];
@@ -532,8 +641,11 @@ try{
   if(s.model) { modelKind = s.model; $('#modelSel').value = s.model; }
   if(s.dev) { devPref = s.dev; $('#devSel').value = s.dev; }
   if(s.smooth) $('#smooth').value = s.smooth;
+  if(s.mode==='bike') mode = 'bike';
+  if(s.bikeType && BIKE_TYPES[s.bikeType]) { bikeType = s.bikeType; $('#bikeType').value = s.bikeType; }
+  if(s.crank) $('#crank').value = s.crank;
 }catch(e){}
-function saveSettings(){ try{ localStorage.setItem(SET_KEY, JSON.stringify({model:modelKind, dev:devPref, smooth:$('#smooth').value})); }catch(e){} }
+function saveSettings(){ try{ localStorage.setItem(SET_KEY, JSON.stringify({model:modelKind, dev:devPref, smooth:$('#smooth').value, mode, bikeType, crank:$('#crank').value})); }catch(e){} }
 
 /* ---------- filtr One Euro ---------- */
 class OneEuro{
@@ -659,7 +771,7 @@ document.querySelectorAll('#viewSeg button').forEach(b => b.onclick = () => setV
 function setView(v){
   view = v;
   document.querySelectorAll('#viewSeg button').forEach(x=>x.classList.toggle('on', x.dataset.v===v));
-  buildAllTable(); buildChartSel();
+  resetCycles(); buildAllTable(); buildChartSel();
 }
 $('#smooth').onchange = () => { resetFilters(); saveSettings(); };
 $('#calBtn').onclick = () => {
@@ -702,12 +814,14 @@ function process(lm, w, h, t){
   const val = {L:{},R:{},S:{}};
   for(const s of ['L','R','S']) for(const k in raw[s]) val[s][k] = raw[s][k]==null ? null : raw[s][k] - (calib[s][k]||0);
   cur = {...val, raw, vis:raw.vis, near:raw.near, t};
+  if(test.cycles) feedCycles(pts, val, raw, t);
   const tl = performance.now()/1000;
   liveBuf.push({t:tl, L:val.L, R:val.R, S:val.S});
   while(liveBuf.length && tl - liveBuf[0].t > 10) liveBuf.shift();
   if(recording){
     const tr = src==='cam' ? tl - recStart : t - recStart;
     samples.push({t:tr, L:{...val.L}, R:{...val.R}, S:{...val.S}});
+    nearCount[raw.near]++;
     countReps(val); trackPeaks(val);
   }
 }
@@ -734,19 +848,92 @@ function computeAngles(P){
     const tt = (knee.y-hip.y)/((ank.y-hip.y)||1), lineX = hip.x + tt*(ank.x-hip.x);
     const dev = 180 - angBetween(sub(hip,knee), sub(ank,knee));
     set('fppa', Math.abs(knee.x-midX) < Math.abs(lineX-midX) ? dev : -dev, ok(I.hip,I.knee,I.ank));
+    const el = P[I.el], wr = P[I.wr];
+    set('hipAng',   angBetween(sub(sh,hip), sub(knee,hip)),       ok(I.sh,I.hip,I.knee));
+    set('shoulder', angBetween(sub(hip,sh), sub(el,sh)),          ok(I.hip,I.sh,I.el));
+    set('elbow',    180 - angBetween(sub(sh,el), sub(wr,el)),     ok(I.sh,I.el,I.wr));
+    set('wrist',    angBetween(sub(wr,el), sub(P[I.idx],wr)),     ok(I.el,I.wr,I.idx));
   }
   const setS = (k,v,q) => { out.S[k] = q>=VIS_MIN ? v : null; out.vis.S[k]=q; };
   const near = (P[L.hip].z < P[R.hip].z) ? 'L' : 'R';
   const N = map(near);
   setS('trunk', signedAng({x:0,y:-1}, sub(P[N.sh],P[N.hip]))*f, ok(N.sh,N.hip));
+  setS('neck', angBetween(sub(P[N.sh],P[N.hip]), sub(P[N.ear],P[N.sh])), ok(N.hip,N.sh,N.ear));
+  setS('trunkH', deg(Math.atan2(P[N.hip].y-P[N.sh].y, Math.abs(P[N.sh].x-P[N.hip].x))), ok(N.sh,N.hip));
   const lr = sub(P[L.hip], P[R.hip]);
   setS('pelvis', deg(Math.atan2(lr.y, Math.abs(lr.x))), ok(L.hip,R.hip));
   const shMid = {x:(P[L.sh].x+P[R.sh].x)/2, y:(P[L.sh].y+P[R.sh].y)/2}, hipMid = {x:(P[L.hip].x+P[R.hip].x)/2, y:(P[L.hip].y+P[R.hip].y)/2};
   const tv = sub(shMid, hipMid), lat = deg(Math.atan2(Math.abs(tv.x), -tv.y));
   setS('trunkLat', (tv.x*lr.x >= 0 ? 1 : -1) * lat, ok(L.sh,R.sh,L.hip,R.hip));
-  out.near = near;
+  out.near = near; out.f = f;
   return out;
 }
+
+/* ---------- analiza obrotów korby (bike fitting) ----------
+   Obrót wykrywamy z ruchu kostki góra–dół. Z każdego obrotu liczymy
+   kąty w dolnym/górnym punkcie, a z długości korby skalę mm/piksel. */
+let cyc = null, lastCycle = {L:null,R:null,S:null}, cycles = [];
+function resetCycles(){ const mk = () => ({buf:[], state:null, start:null, frames:[]}); cyc = {L:mk(), R:mk()}; lastCycle = {L:null,R:null,S:null}; trail = {L:[],R:[]}; }
+resetCycles();
+const crankMm = () => { const v = parseFloat(String($('#crank').value).replace(',','.')); return v>100 && v<220 ? v : 172.5; };
+function feedCycles(P, val, raw, t){
+  const swap = $('#swap').checked, map = s => IDX[swap ? (s==='L'?'R':'L') : s];
+  for(const s of ['L','R']){
+    const I = map(s), C = cyc[s];
+    const ank=P[I.ank], heel=P[I.heel], toe=P[I.toe], knee=P[I.knee], hip=P[I.hip];
+    if(Math.min(ank.v, knee.v, hip.v) < VIS_MIN) continue;
+    const lastF = C.frames[C.frames.length-1];
+    if(lastF && (t < lastF.t || t - lastF.t > 1)){ C.buf=[]; C.frames=[]; C.start=null; C.state=null; }   // przewinięcie / przerwa
+    const ped = {x: heel.x + .72*(toe.x-heel.x), y: heel.y + .72*(toe.y-heel.y)};   // oś pedału ≈ pod przodostopiem
+    const fr = {t, ay:ank.y, kx:knee.x, hy:hip.y, pf:raw.f*ped.x, kr:raw.f*(knee.x-ped.x),
+                knee:val[s].knee, hipAng:val[s].hipAng, ankle:val[s].ankle, pelvis:val.S.pelvis};
+    C.frames.push(fr);
+    C.buf.push({t, y:ank.y}); while(C.buf.length && t - C.buf[0].t > 3) C.buf.shift();
+    let mn=Infinity, mx=-Infinity; for(const b of C.buf){ if(b.y<mn) mn=b.y; if(b.y>mx) mx=b.y; }
+    const amp = mx-mn, mid = (mx+mn)/2;
+    if(amp < canvas.height*0.03) continue;
+    const st = ank.y > mid + amp*.2 ? 'low' : ank.y < mid - amp*.2 ? 'high' : C.state;
+    if(C.state==='high' && st==='low'){
+      if(C.start!=null){ const r = cycleStats(C.frames, t - C.start); if(r) onCycle(s, r); }
+      C.start = t; C.frames = [fr];
+    }
+    C.state = st;
+  }
+}
+function cycleStats(F, dur){
+  if(dur < .25 || dur > 3 || F.length < 6) return null;
+  const mm = k => { const a = F.map(x=>x[k]).filter(v=>v!=null); return a.length ? [Math.min(...a), Math.max(...a)] : [null,null]; };
+  const [aMin,aMax] = mm('ay'), scale = aMax>aMin ? 2*crankMm()/(aMax-aMin) : null;
+  const [kMin,kMax] = mm('knee'), [hMin,hMax] = mm('hipAng'), [anMin,anMax] = mm('ankle');
+  const [hyMin,hyMax] = mm('hy'), [kxMin,kxMax] = mm('kx'), [pMin,pMax] = mm('pelvis');
+  const fwd = F.reduce((b,x) => x.pf > b.pf ? x : b, F[0]);
+  return { kneeBDC:kMin, kneeTDC:kMax, hipClosed:hMin, hipOpen:hMax, ankleROM: anMin!=null ? anMax-anMin : null,
+    kops: scale ? fwd.kr*scale : null, hipBob: scale ? (hyMax-hyMin)*scale : null, kneeTravel: scale ? (kxMax-kxMin)*scale : null,
+    pelvisRock: pMin!=null ? pMax-pMin : null, cadence: 60/dur };
+}
+function onCycle(s, r){
+  lastCycle[s] = r;
+  const S = lastCycle.S || {};
+  lastCycle.S = { cadence:r.cadence, pelvisRock:r.pelvisRock, hipBob: (!cur || s===cur.near) ? r.hipBob : S.hipBob };
+  if(recording) cycles.push({side:s, ...r});
+}
+function cycStats(list, near){
+  const out = {};
+  for(const k in METRICS){
+    if(!METRICS[k].cyc) continue;
+    for(const s of sidesOf(k)){
+      const src = s==='S' ? list.filter(c => k!=='hipBob' || !near || c.side===near) : list.filter(c => c.side===s);
+      const vals = src.map(c=>c[k]).filter(v=>v!=null && isFinite(v)).sort((a,b)=>a-b);
+      if(vals.length < 2) continue;
+      const cut = Math.floor(vals.length*.1), v2 = vals.slice(cut, vals.length-cut);   // odrzuć 10% skrajnych obrotów
+      const mean = v2.reduce((a,b)=>a+b,0)/v2.length, sd = Math.sqrt(v2.reduce((a,b)=>a+(b-mean)**2,0)/v2.length);
+      if(!out[k]) out[k] = {};
+      out[k][s] = {mean, sd, n:vals.length, min:vals[0], max:vals[vals.length-1], rom:vals[vals.length-1]-vals[0], absmax:Math.max(Math.abs(vals[0]),Math.abs(vals[vals.length-1]))};
+    }
+  }
+  return out;
+}
+const curVal = (k, s) => METRICS[k].cyc ? (lastCycle[s]?.[k] ?? null) : (cur ? cur[s][k] : null);
 
 function countReps(val){
   const r = test.rep; if(!r) return;
@@ -762,9 +949,9 @@ function trackPeaks(val){
   const now = performance.now();
   for(const s of sidesOf(p.m)){
     const v = val[s]?.[p.m]; if(v==null) continue;
-    if(peaks[s]==null || p.dir*(v - peaks[s]) > 1){
-      peaks[s] = v;
-      if(now - (lastSnapT[s]||0) > 300){
+    if((peaks[s]==null || p.dir*(v - peaks[s]) > 1) && now - (lastSnapT[s]||0) > 300){
+      peaks[s] = v;   // zdjęcie i zapisana wartość zawsze z tej samej klatki
+      {
         lastSnapT[s] = now;
         const img = grab();
         snapshots = snapshots.filter(x => x.side!==s);
@@ -831,8 +1018,26 @@ function draw(w,h){
         line(knee, ext(hip,knee,.35), 'rgba(255,255,255,.5)', 1.5*sc, [6*sc,5*sc]);
         arc(knee, hip, ank, c); arc(hip, sh, knee, c, 30); arc(ank, knee, toe, c, 28);
         label(knee, `Kolano ${fmt(cur[s].knee)}`, c);
+        if(mode==='bike'){
+          const el = X(pts[I.el]), wr = X(pts[I.wr]);
+          const ped = {x: heel.x+.72*(toe.x-heel.x), y: heel.y+.72*(toe.y-heel.y), v:Math.min(heel.v,toe.v)};
+          line(sh,hip,c,lw*.8); line(sh,el,c,lw*.8); line(el,wr,c,lw*.8);
+          arc(el, sh, wr, c, 24); arc(sh, hip, el, c, 24);
+          line(knee, {x:knee.x, y:ped.y+24*sc, v:knee.v}, 'rgba(255,255,255,.65)', 1.5*sc, [6*sc,5*sc]);   // pion z kolana
+          if(ped.v>=VIS_MIN){ ctx.fillStyle=css('--accent'); ctx.beginPath(); ctx.arc(ped.x,ped.y,lw*1.4,0,7); ctx.fill(); }
+          const hand = X(pts[I.idx]), ear = X(pts[I.ear]);
+          line(wr,hand,c,lw*.6); line(sh,ear,'rgba(255,255,255,.7)',lw*.6);
+          [el,wr,hand].forEach(p=>dot(p,c));
+          label(wr, `Nadgarstek ${fk('wrist',cur[s].wrist)}`, c, 14, 26);
+          label(ear, `Szyja ${fk('neck',cur.S.neck)}`, css('--accent'), 14, -16);
+          label(hip, `Biodro ${fk('hipAng',cur[s].hipAng)}`, c, 14, -24);
+          label(el, `Łokieć ${fk('elbow',cur[s].elbow)}`, c, 14, 26);
+          label(sh, `Bark ${fk('shoulder',cur[s].shoulder)}`, c, 14, -34);
+          label(ank, `Kostka ${fk('ankle',cur[s].ankle)}`, c, 14, 36);
+        } else {
         label(hip, `Biodro ${fmt(cur[s].hip)}`, c, 14, -24);
         label(ank, `Kostka ${fmt(cur[s].ankle,true)}`, c, 14, 36);
+        }
         if(testKey==='lunge'){
           line(ank, {x:ank.x, y:knee.y, v:ank.v}, 'rgba(255,255,255,.55)', 1.5*sc, [6*sc,5*sc]);
           label(knee, `Goleń ${fmt(cur[s].tibia,true)}`, c, 14, 18);
@@ -840,8 +1045,14 @@ function draw(w,h){
       }
     } else {
       line(hip, ank, 'rgba(255,255,255,.55)', 1.5*sc, [6*sc,5*sc]);
+      if(mode==='bike'){
+        const tr = trail[s]; tr.push({x:knee.x, y:knee.y}); if(tr.length > 45) tr.shift();
+        ctx.strokeStyle = c; ctx.lineWidth = 2*sc; ctx.beginPath(); tr.forEach((p,i)=> i ? ctx.lineTo(p.x,p.y) : ctx.moveTo(p.x,p.y)); ctx.stroke();
+        label(knee, `Kolano bok ${fk('kneeTravel', lastCycle[s]?.kneeTravel)}`, c, (knee.x > (hL.x+hR.x)/2) ? 14 : -190, -14);
+      } else {
       arc(knee, hip, ank, c, 30);
       label(knee, `FPPA ${fmt(cur[s].fppa,true)}`, c, (knee.x > (hL.x+hR.x)/2) ? 14 : -150, -14);
+      }
     }
     [hip,knee,ank,heel,toe].forEach(p=>dot(p,c));
     ctx.globalAlpha = 1;
@@ -850,6 +1061,9 @@ function draw(w,h){
     const mid = {x:(hL.x+hR.x)/2, y:(hL.y+hR.y)/2, v:1};
     line({x:mid.x-120*sc,y:mid.y,v:1},{x:mid.x+120*sc,y:mid.y,v:1},'rgba(255,255,255,.35)',1.5*sc,[5*sc,5*sc]);
     label(mid, `Miednica ${fmt(cur.S.pelvis,true)}`, css('--accent'), -70, -26);
+  } else if(mode==='bike' && cur.S.trunkH!=null){
+    const N = map(cur.near), a = X(pts[N.sh]), b = X(pts[N.hip]);
+    label({x:(a.x+b.x)/2, y:(a.y+b.y)/2, v:1}, `Tułów ${fk('trunkH',cur.S.trunkH)}`, css('--accent'), -40, -18);
   } else if(cur.S.trunk!=null){
     label(X(pts[map(cur.near).sh]), `Tułów ${fmt(cur.S.trunk,true)}`, css('--accent'), 14, -10);
   }
@@ -859,8 +1073,21 @@ function draw(w,h){
    INTERFEJS
    ========================================================= */
 const testSel = $('#testSel');
-testSel.innerHTML = Object.entries(TESTS).map(([k,t])=>`<option value="${k}">${t.name}</option>`).join('');
 testSel.onchange = () => setTest(testSel.value);
+function setMode(m, silent){
+  if(recording) toggleRec();
+  mode = m; document.body.dataset.mode = m;
+  document.querySelectorAll('#modeBar button').forEach(b=>b.classList.toggle('on', b.dataset.m===m));
+  testSel.innerHTML = Object.entries(TESTS).filter(([k,t]) => (t.mode||'rehab')===m).map(([k,t])=>`<option value="${k}">${t.name}</option>`).join('');
+  setTest(m==='bike' ? 'bikeSide' : 'free');
+  saveSettings(); measureHeader();
+  if(!silent) toast(m==='bike' ? 'Tryb: Bike fitting' : 'Tryb: Rehabilitacja');
+}
+document.querySelectorAll('#modeBar button').forEach(b => b.onclick = () => { if(b.dataset.m!==mode) setMode(b.dataset.m); });
+$('#bikeType').onchange = e => { bikeType = e.target.value; saveSettings(); setTest(testKey); };
+$('#crank').onchange = () => saveSettings();
+function measureHeader(){ document.documentElement.style.setProperty('--hdrh', $('header.top').offsetHeight + 'px'); }
+window.addEventListener('resize', measureHeader);
 const pct = (v,M) => Math.max(0,Math.min(100,(v-M.range[0])/(M.range[1]-M.range[0])*100));
 function setTest(k){
   if(recording) toggleRec();
@@ -869,24 +1096,26 @@ function setTest(k){
   setView(test.view);
   $('#hero').innerHTML = test.primary.map(m => {
     const M = METRICS[m];
-    const cells = sidesOf(m).map(s => `<div class="hv ${s}"><small><span>${s==='L'?'Lewa':s==='R'?'Prawa':'Wartość'}</span><span class="mono" id="mm-${m}-${s}"></span></small>
+    const cells = sidesOf(m).map(s => `<div class="hv ${s}"><small><span>${s==='L'?'Lewa':s==='R'?'Prawa':(M.cyc?'Ostatni obrót':'Wartość')}</span><span class="mono" id="mm-${m}-${s}"></span></small>
       <div class="big mono" id="hv-${m}-${s}">—</div><div class="bar" id="hb-${m}-${s}"><i></i><b></b></div></div>`).join('');
     return `<div class="hcard"><div class="hn">${M.name}<span>${M.hint}</span></div><div class="hvals">${cells}</div></div>`;
-  }).join('') + (test.rep ? `<div class="reps">Powtórzenia <span class="sp"></span><span class="cL">L</span> <b id="repL">0</b> <span class="cR">P</span> <b id="repR">0</b></div>` : '');
+  }).join('') + (test.cycles ? `<div class="cycinfo" id="cycInfo">Pedałuj równo – wartości pojawią się po pierwszym pełnym obrocie korby.</div>` : '') + (test.rep ? `<div class="reps">Powtórzenia <span class="sp"></span><span class="cL">L</span> <b id="repL">0</b> <span class="cR">P</span> <b id="repR">0</b></div>` : '');
   for(const m of test.primary){
-    const M = METRICS[m], n = test.norms.find(x=>x.m===m && !x.asym);
+    const M = METRICS[m], n0 = test.norms.find(x=>x.m===m && !x.asym), n = n0 && normFor(n0, bikeType);
     for(const s of sidesOf(m)){
       const i = document.querySelector(`#hb-${m}-${s} i`); if(!i) continue;
       if(n){ const lo = n.lo ?? M.range[0], hi = n.hi ?? M.range[1]; i.style.left = pct(lo,M)+'%'; i.style.width = (pct(hi,M)-pct(lo,M))+'%'; }
       else i.style.display='none';
     }
   }
-  $('#liveStrip').innerHTML = test.primary.map(m => `<span class="lv"><small>${METRICS[m].short}</small>${sidesOf(m).map(s=>`<span class="c${s==='S'?'':s} mono" id="ls-${m}-${s}">—</span>`).join('')}</span>`).join('');
-  $('#chartSel').value = test.primary[0];
+  resetCycles();
+  $('#liveStrip').innerHTML = test.primary.slice(0,3).map(m => `<span class="lv"><small>${METRICS[m].short}</small>${sidesOf(m).map(s=>`<span class="c${s==='S'?'':s} mono" id="ls-${m}-${s}">—</span>`).join('')}</span>`).join('');
+  const ch = test.primary.find(m=>!METRICS[m].cyc) || (test.view==='sag' ? 'knee' : 'pelvis');
+  $('#chartSel').value = ch;
 }
 function buildAllTable(){
-  const keys = Object.keys(METRICS).filter(k=>METRICS[k].view===view);
-  $('#allTbl').innerHTML = `<tr><th>Kąt</th><th class="cL">L</th><th class="cR">P</th><th>min/maks</th></tr>` +
+  const keys = keysFor(view, mode).filter(k => !METRICS[k].cyc || test.cycles);
+  $('#allTbl').innerHTML = `<tr><th>Kąt</th><th class="cL">L</th><th class="cR">P</th><th>${mode==='bike'?'min/maks · śr.':'min/maks'}</th></tr>` +
     keys.map(k => {
       const M = METRICS[k];
       const v = M.sides ? `<td class="mono" id="tv-${k}-L">—</td><td class="mono" id="tv-${k}-R">—</td>` : `<td colspan="2" class="mono" id="tv-${k}-S">—</td>`;
@@ -894,7 +1123,7 @@ function buildAllTable(){
     }).join('');
 }
 function buildChartSel(){
-  const keys = Object.keys(METRICS).filter(k=>METRICS[k].view===view);
+  const keys = keysFor(view, mode).filter(k => !METRICS[k].cyc);
   const sel = $('#chartSel'), v = sel.value;
   sel.innerHTML = keys.map(k=>`<option value="${k}">${METRICS[k].name}</option>`).join('');
   sel.value = keys.includes(v) ? v : keys[0];
@@ -905,27 +1134,32 @@ let liveStats = null, statsAt = 0;
 function updateUI(){
   if(recording){
     $('#recBadge').textContent = `● REC ${(samples.length ? last(samples).t : 0).toFixed(1)} s`;
-    if(performance.now()-statsAt > 600){ liveStats = computeStats(samples); statsAt = performance.now(); }
+    if(performance.now()-statsAt > 600){ liveStats = {...computeStats(samples), ...(test.cycles ? cycStats(cycles, nearSide()) : {})}; statsAt = performance.now(); }
+  }
+  if(test.cycles){
+    const ci = $('#cycInfo'), cad = lastCycle.S?.cadence;
+    if(ci && cad) ci.innerHTML = `Kadencja <b>${Math.round(cad)}</b> obr/min · ${recording ? `nagrane obroty: <b>${cycles.length}</b>` : 'wartości z ostatniego obrotu – nagraj sesję, by uśrednić'}`;
   }
   const st = recording ? liveStats : (lastSession?.stats || null);
   for(const k in METRICS){
     const M = METRICS[k];
     for(const s of sidesOf(k)){
-      const v = cur ? cur[s][k] : null, q = cur ? cur.vis[s][k] : null;
+      const v = curVal(k, s), q = M.cyc ? (v==null ? null : 1) : (cur ? cur.vis[s][k] : null);
       const tv = document.getElementById(`tv-${k}-${s}`);
-      if(tv) tv.innerHTML = `<span class="q" style="background:${qColor(q)}"></span>${fmt(v, M.signed)}`;
-      const ls = document.getElementById(`ls-${k}-${s}`); if(ls) ls.textContent = fmt(v, M.signed);
+      if(tv) tv.innerHTML = `<span class="q" style="background:${qColor(q)}"></span>${fk(k, v)}`;
+      const ls = document.getElementById(`ls-${k}-${s}`); if(ls) ls.textContent = fk(k, v);
       const hv = document.getElementById(`hv-${k}-${s}`);
       if(hv){
-        hv.textContent = fmt(v, M.signed);
+        const txt = fk(k, v), u = M.unit && v!=null ? ' '+M.unit : '';
+        hv.innerHTML = u ? `${esc(txt.slice(0, -u.length))}<span class="u">${esc(M.unit)}</span>` : esc(txt);
         hv.style.opacity = (view==='sag' && cur && M.sides && s!==cur.near) ? .5 : 1;
         const b = document.querySelector(`#hb-${k}-${s} b`); if(b) b.style.left = v==null ? '-10px' : `calc(${pct(v,M)}% - 1px)`;
         const mm = document.getElementById(`mm-${k}-${s}`);
-        if(mm) mm.textContent = st?.[k]?.[s] ? `${fmt(st[k][s].min,true)}…${fmt(st[k][s].max,true)}` : (view==='sag' && cur && M.sides && s===cur.near ? 'bliżej' : '');
+        if(mm) mm.textContent = st?.[k]?.[s] ? (M.cyc ? `śr. ${fk(k,st[k][s].mean)} ±${Math.round(st[k][s].sd)}` : `${fk(k,st[k][s].min,true)}…${fk(k,st[k][s].max,true)}`) : (view==='sag' && cur && M.sides && s===cur.near ? 'bliżej' : '');
       }
     }
     const tr = document.getElementById(`tr-${k}`);
-    if(tr) tr.textContent = st?.[k] ? sidesOf(k).map(s=>st[k][s] ? `${Math.round(st[k][s].min)}/${Math.round(st[k][s].max)}` : '—').join(' · ') : '—';
+    if(tr) tr.textContent = st?.[k] ? sidesOf(k).map(s=>st[k][s] ? (METRICS[k].cyc ? `${Math.round(st[k][s].mean)}±${Math.round(st[k][s].sd)}` : `${Math.round(st[k][s].min)}/${Math.round(st[k][s].max)}`) : '—').join(' · ') : '—';
   }
   if(test.rep){ $('#repL').textContent = reps.L; $('#repR').textContent = reps.R; }
   if($('#page-chart').classList.contains('on')) drawChart();
@@ -941,13 +1175,14 @@ function toggleRec(){
   $('#recBadge').classList.toggle('on', recording);
   $('#recBtn').textContent = recording ? '■ Stop' : '● Nagrywaj';
   if(recording){
-    samples=[]; reps={L:0,R:0}; repState={L:false,R:false}; peaks={L:null,R:null,S:null}; snapshots=[]; lastSnapT={}; liveStats=null;
+    samples=[]; reps={L:0,R:0}; repState={L:false,R:false}; peaks={L:null,R:null,S:null}; snapshots=[]; lastSnapT={}; liveStats=null; cycles=[]; nearCount={L:0,R:0};
     recStart = src==='cam' ? performance.now()/1000 : video.currentTime;
     if(src==='file' && video.paused) video.play().catch(()=>{});
     keepAwake();
   } else {
-    if(samples.length < 5){ toast('Za mało danych – pacjent nie był widoczny.'); return; }
+    if(samples.length < 5){ toast('Za mało danych – sylwetka nie była widoczna.'); return; }
     lastSession = makeSession();
+    if(test.cycles && cycles.length < 4){ toast('Wykryto mało obrotów korby – nagraj dłużej (20–30 s równej jazdy).', 5000); return; }
     $('#chartInfo').textContent = `Nagrana sesja – ${lastSession.duration.toFixed(1)} s`;
     toast('Sesja zapisana. Zobacz zakładkę Raport.');
   }
@@ -956,6 +1191,7 @@ function median5(a){ return a.map((_,i)=>{ const w=a.slice(Math.max(0,i-2),i+3).
 function computeStats(S){
   const out = {};
   for(const k in METRICS){
+    if(METRICS[k].cyc) continue;
     for(const s of sidesOf(k)){
       const vals = median5(S.map(x=>x[s]?.[k] ?? null)).filter(v=>v!=null);
       if(vals.length < 3) continue;
@@ -966,24 +1202,30 @@ function computeStats(S){
   }
   return out;
 }
-function patient(){ return {name:$('#pName').value.trim(), birth:$('#pBirth').value, side:$('#pSide').value, diag:$('#pDiag').value.trim(), stage:$('#pStage').value.trim(), ther:$('#pTher').value.trim()}; }
+function patient(){ return {name:$('#pName').value.trim(), birth:$('#pBirth').value, side:$('#pSide').value, diag:$('#pDiag').value.trim(), stage:$('#pStage').value.trim(), ther:$('#pTher').value.trim(),
+  bike:$('#bModel').value.trim(), saddle:$('#bSaddle').value.trim(), goal:$('#bGoal').value.trim()}; }
+const nearSide = () => nearCount.L + nearCount.R ? (nearCount.L >= nearCount.R ? 'L' : 'R') : null;
 function makeSession(){
-  return { id: Date.now(), date: new Date().toISOString(), testKey, view, model: modelKind,
+  const near = nearSide();
+  return { id: Date.now(), date: new Date().toISOString(), mode, testKey, view, model: modelKind,
     calibrated: Object.values(calib).some(o=>Object.keys(o).length), duration: last(samples).t, frames: samples.length,
-    stats: computeStats(samples), reps: test.rep ? {...reps} : null, samples: samples.slice(), snapshots: snapshots.slice() };
+    stats: {...computeStats(samples), ...(test.cycles ? cycStats(cycles, near) : {})}, reps: test.rep ? {...reps} : null,
+    near, cycles: test.cycles ? cycles.length : null, bike: mode==='bike' ? {type:bikeType, crank:crankMm()} : null,
+    samples: samples.slice(), snapshots: snapshots.slice() };
 }
-function emptySession(){ return { id: measurements[0].id, date:new Date().toISOString(), testKey, view, model:modelKind, duration:0, frames:0, stats:{}, reps:null, samples:[], snapshots:[] }; }
+function emptySession(){ return { id: measurements[0].id, date:new Date().toISOString(), mode, testKey, view, model:modelKind, duration:0, frames:0, stats:{}, reps:null,
+  bike: mode==='bike' ? {type:bikeType, crank:crankMm()} : null, samples:[], snapshots:[] }; }
 
 $('#snapBtn').onclick = () => {
   if(!cur){ toast('Brak wykrytej sylwetki.'); return; }
-  const m = { id:Date.now(), label:`Pomiar ${measurements.length+1}`, view, img:grab(), L:{...cur.L}, R:{...cur.R}, S:{...cur.S} };
+  const m = { id:Date.now(), label:`Pomiar ${measurements.length+1}`, view, mode, img:grab(), L:{...cur.L}, R:{...cur.R}, S:{...cur.S} };
   measurements.push(m); renderMeas(); toast(`Zapisano: ${m.label}`);
 };
 function renderMeas(){
-  const keys = v => Object.keys(METRICS).filter(x=>METRICS[x].view===v);
+  const keys = m => keysFor(m.view, m.mode||'rehab').filter(k=>!METRICS[k].cyc);
   $('#measList').innerHTML = measurements.length ? measurements.map((m,i)=>`<div class="mi"><img src="${m.img}" alt="">
     <div><input type="text" value="${esc(m.label)}" data-i="${i}">
-    ${keys(m.view).map(k=>`${METRICS[k].short}: ${METRICS[k].sides ? `<span class="cL">${fmt(m.L[k],METRICS[k].signed)}</span> / <span class="cR">${fmt(m.R[k],METRICS[k].signed)}</span>` : fmt(m.S[k],true)}`).join('<br>')}
+    ${keys(m).map(k=>`${METRICS[k].short}: ${METRICS[k].sides ? `<span class="cL">${fk(k,m.L[k])}</span> / <span class="cR">${fk(k,m.R[k])}</span>` : fk(k,m.S[k],true)}`).join('<br>')}
     <div style="margin-top:6px"><button class="btn small" data-del="${i}">Usuń</button></div></div></div>`).join('')
     : '<p class="muted" style="font-size:14px">Brak zapisanych pomiarów.</p>';
 }
@@ -1014,7 +1256,7 @@ function drawChart(target, opts={}){
   const sides = sidesOf(k);
   let tmin = Infinity, tmax = -Infinity, vmin = Infinity, vmax = -Infinity;
   for(const d of data) for(const s of sides){ const v = d[s]?.[k]; if(v==null) continue; vmin=Math.min(vmin,v); vmax=Math.max(vmax,v); tmin=Math.min(tmin,d.t-t0); tmax=Math.max(tmax,d.t-t0); }
-  const n = (sess ? TESTS[sess.testKey] : test).norms.find(x=>x.m===k && !x.asym);
+  const n0 = (sess ? TESTS[sess.testKey] : test).norms.find(x=>x.m===k && !x.asym), n = n0 && normFor(n0, sess?.bike?.type || bikeType);
   if(n){ if(n.lo!=null){vmin=Math.min(vmin,n.lo);vmax=Math.max(vmax,n.lo);} if(n.hi!=null){vmin=Math.min(vmin,n.hi);vmax=Math.max(vmax,n.hi);} }
   if(!isFinite(vmin)){ vmin=M.range[0]; vmax=M.range[1]; }
   if(!recording && !sess){ tmin = 0; tmax = 10; }
@@ -1058,7 +1300,7 @@ function openTab(t){
 /* =========================================================
    PACJENT I HISTORIA
    ========================================================= */
-const pFields = ['pName','pBirth','pSide','pDiag','pStage','pTher','pNotes'];
+const pFields = ['pName','pBirth','pSide','pDiag','pStage','pTher','pNotes','bModel','bSaddle','bGoal'];
 try{ const p = JSON.parse(localStorage.getItem(PATIENT_KEY)||'{}'); pFields.forEach(f=>{ if(p[f]!=null) $('#'+f).value=p[f]; }); }catch(e){}
 pFields.forEach(f => $('#'+f).addEventListener('input', () => {
   try{ localStorage.setItem(PATIENT_KEY, JSON.stringify(Object.fromEntries(pFields.map(x=>[x,$('#'+x).value])))); }catch(e){}
@@ -1066,14 +1308,14 @@ pFields.forEach(f => $('#'+f).addEventListener('input', () => {
 function loadHist(){ try{ return JSON.parse(localStorage.getItem(HIST_KEY)||'[]'); }catch(e){ return []; } }
 function saveHistArr(a){ try{ localStorage.setItem(HIST_KEY, JSON.stringify(a)); return true; }catch(e){ toast('Brak miejsca – wyeksportuj i usuń starsze sesje.',5000); return false; } }
 function histEntry(sess){
-  return { id:sess.id, date:sess.date, testKey:sess.testKey, view:sess.view, model:sess.model, duration:sess.duration, frames:sess.frames,
-    stats:sess.stats, reps:sess.reps, patient:patient(), notes:$('#pNotes').value,
-    measurements: measurements.map(m=>({label:m.label, view:m.view, L:m.L, R:m.R, S:m.S})) };
+  return { id:sess.id, date:sess.date, mode:sess.mode||'rehab', testKey:sess.testKey, view:sess.view, model:sess.model, duration:sess.duration, frames:sess.frames,
+    stats:sess.stats, reps:sess.reps, near:sess.near, cycles:sess.cycles, bike:sess.bike, patient:patient(), notes:$('#pNotes').value,
+    measurements: measurements.map(m=>({label:m.label, view:m.view, mode:m.mode, L:m.L, R:m.R, S:m.S})) };
 }
 $('#saveHist').onclick = () => {
   const sess = lastSession || (measurements.length ? emptySession() : null);
   if(!sess){ toast('Najpierw nagraj sesję albo zapisz pomiar.'); return; }
-  if(!patient().name){ toast('Wpisz imię i nazwisko pacjenta.'); openTab('patient'); $('#pName').focus(); return; }
+  if(!patient().name){ toast(mode==='bike' ? 'Wpisz imię i nazwisko klienta.' : 'Wpisz imię i nazwisko pacjenta.'); openTab('patient'); $('#pName').focus(); return; }
   const a = loadHist().filter(x=>x.id!==sess.id); a.push(histEntry(sess));
   if(saveHistArr(a)){ toast('Sesja zapisana w historii.'); buildReport(); }
 };
@@ -1081,8 +1323,8 @@ function renderHist(){
   const a = loadHist().sort((x,y)=>y.date.localeCompare(x.date));
   $('#histList').innerHTML = a.length ? a.map(h => {
     const T = TESTS[h.testKey], n = T?.norms.find(x=>x.m && x.m[0]!=='_' && !x.asym);
-    const key = n && h.stats[n.m] ? sidesOf(n.m).map(s=>h.stats[n.m][s] ? `${s==='S'?'':s==='L'?'L ':'P '}${fmt(h.stats[n.m][s][n.stat],true)}` : '').join(' · ') : '';
-    return `<div class="hi"><b>${esc(h.patient?.name)||'—'}</b> <span class="muted">· ${new Date(h.date).toLocaleDateString('pl-PL')}</span><br>
+    const key = n && h.stats[n.m] ? sidesOf(n.m).map(s=>h.stats[n.m][s] ? `${s==='S'?'':s==='L'?'L ':'P '}${fk(n.m,h.stats[n.m][s][n.stat],true)}` : '').join(' · ') : '';
+    return `<div class="hi"><b>${esc(h.patient?.name)||'—'}</b> <span class="muted">· ${new Date(h.date).toLocaleDateString('pl-PL')} · ${h.mode==='bike'?'Bike fitting':'Rehabilitacja'}</span><br>
       ${T?.name||h.testKey}${key?` <span class="muted">· ${METRICS[n.m].short}: ${key}</span>`:''}
       <div class="r"><button class="btn small" data-rep="${h.id}">Raport</button><button class="btn small" data-hdel="${h.id}">Usuń</button></div></div>`;
   }).join('') : '<p class="muted" style="font-size:14px;margin:0">Brak zapisanych sesji.</p>';
@@ -1115,9 +1357,57 @@ function judge(n, v){
 const TAG = {ok:'<span class="tag t-ok">w normie</span>', warn:'<span class="tag t-warn">granica</span>', bad:'<span class="tag t-bad">poza normą</span>'};
 function asym(a,b){ if(a==null||b==null) return null; const m=Math.max(Math.abs(a),Math.abs(b)); return m<1?0:Math.abs(a-b)/m*100; }
 
+/* ---------- zalecenia bike fittingu (orientacyjne) ---------- */
+function bikeAdvice(sess){
+  const st = sess.stats || {}, type = sess.bike?.type || 'endurance', T = TESTS[sess.testKey], out = [];
+  const side = sess.view==='sag' ? (sess.near || 'L') : null;
+  const val = k => { const o = st[k]; if(!o) return null; const M = METRICS[k]; return M.sides ? (side ? o[side]?.mean : null) : o.S?.mean; };
+  const N = k => { const n = T.norms.find(x=>x.m===k); return n ? normFor(n, type) : {}; };
+  const r = v => Math.round(v);
+  if(sess.view==='sag'){
+    const kb = val('kneeBDC'), nb = N('kneeBDC');
+    if(kb!=null && kb < nb.lo) out.push(`<b>Siodło prawdopodobnie za wysoko.</b> Kolano w dolnym punkcie jest prawie wyprostowane (${r(kb)}°). Obniż siodło o ok. <b>${Math.max(3, r((35-kb)*2.5))} mm</b> i zmierz ponownie.`);
+    if(kb!=null && kb > nb.hi) out.push(`<b>Siodło prawdopodobnie za nisko.</b> Kolano w dolnym punkcie jest mocno zgięte (${r(kb)}°). Podnieś siodło o ok. <b>${Math.max(3, r((kb-35)*2.5))} mm</b> i zmierz ponownie.`);
+    const kp = val('kops'), nk = N('kops'), mid = (nk.lo + nk.hi)/2;
+    if(kp!=null && kp > nk.hi) out.push(`Kolano jest za bardzo z przodu względem osi pedału (${fk('kops',kp)}). Rozważ przesunięcie siodła <b>do tyłu o ok. ${r(kp-mid)} mm</b> (po zmianie skoryguj wysokość siodła).`);
+    if(kp!=null && kp < nk.lo) out.push(`Kolano jest daleko za osią pedału (${fk('kops',kp)}). Rozważ przesunięcie siodła <b>do przodu o ok. ${r(mid-kp)} mm</b>.`);
+    const hc = val('hipClosed'), nh = N('hipClosed');
+    if(hc!=null && hc < nh.lo) out.push(`Biodro mocno zamknięte w górnym punkcie (${r(hc)}°). Pomaga podniesienie kierownicy (podkładki pod mostek), krótszy mostek lub krótsze korby.`);
+    const th = val('trunkH'), nt = N('trunkH');
+    if(th!=null && th < nt.lo) out.push(`Pozycja bardzo pochylona jak na ${BIKE_TYPES[type].toLowerCase()} (tułów ${r(th)}° do poziomu). Podnieś kierownicę lub skróć mostek.`);
+    if(th!=null && th > nt.hi) out.push(`Pozycja dość wyprostowana (tułów ${r(th)}° do poziomu). Jeśli kolarz chce być bardziej aerodynamiczny i pozwala na to jego mobilność – obniż kierownicę lub wydłuż mostek.`);
+    const sh = val('shoulder'), ns = N('shoulder');
+    if(sh!=null && sh > ns.hi) out.push(`Kąt barku ${r(sh)}° – zasięg do kierownicy jest za długi. Rozważ krótszy mostek lub kierownicę z mniejszym reach.`);
+    if(sh!=null && sh < ns.lo) out.push(`Kąt barku ${r(sh)}° – zasięg jest za krótki, kolarz jest „ściśnięty”. Rozważ dłuższy mostek.`);
+    const el = val('elbow'), ne = N('elbow');
+    if(el!=null && el < ne.lo) out.push(`Ręce prawie proste (łokieć ${r(el)}°). Łokcie powinny być lekko ugięte – jeśli kolarz nie może ich rozluźnić, zasięg jest za długi.`);
+    if(el!=null && el > ne.hi && type!=='tt') out.push(`Łokcie mocno ugięte (${r(el)}°) – zasięg może być za krótki albo kierownica za nisko.`);
+    const wr = val('wrist');
+    if(wr!=null && wr > N('wrist').hi) out.push(`Nadgarstki zgięte (${r(wr)}°). Sprawdź kąt kierownicy i ustawienie klamkomanetek – dłoń powinna być w linii przedramienia, inaczej drętwieją palce.`);
+    const nk2 = val('neck');
+    if(nk2!=null && nk2 > N('neck').hi) out.push(`Głowa mocno odchylona od linii pleców (${r(nk2)}°) – obciążenie karku. Pomaga wyższa kierownica, krótszy zasięg lub praca nad mobilnością odcinka piersiowego.`);
+    const ar = val('ankleROM');
+    if(ar!=null && ar > N('ankleROM').hi) out.push(`Duża praca stopy w obrocie (${r(ar)}°) – często efekt sięgania stopą w dół przy zbyt wysokim siodle.`);
+    const hb = st.hipBob?.S?.mean;
+    if(hb!=null && hb > N('hipBob').hi) out.push(`Biodra kołyszą się w pionie (${r(hb)} mm) – najczęściej siodło za wysoko lub zmęczenie/niestabilność tułowia.`);
+  } else {
+    for(const s of ['L','R']){
+      const kt = st.kneeTravel?.[s]?.mean;
+      if(kt!=null && kt > 20) out.push(`${s==='L'?'Lewe':'Prawe'} kolano porusza się na boki o ${r(kt)} mm. Sprawdź ustawienie bloków (rotacja, przesunięcie), szerokość ustawienia stóp (podkładki pod pedały) i podparcie łuku stopy (wkładki, kliny).`);
+    }
+    const pr = st.pelvisRock?.S?.mean;
+    if(pr!=null && pr > 5) out.push(`Miednica kołysze się na boki (${r(pr)}°) – siodło może być za wysoko albo występuje różnica długości nóg / niestabilność tułowia.`);
+  }
+  const a = st.kneeBDC, k = st.kneeTravel;
+  if(a?.L && a?.R && Math.abs(a.L.mean-a.R.mean) > 5) out.push(`Różnica kolana w dolnym punkcie między nogami: ${r(Math.abs(a.L.mean-a.R.mean))}°. Zmierz obie strony z boku (obracając rower) – może to wskazywać na różnicę długości nóg lub ustawienia bloków.`);
+  if(k?.L && k?.R && Math.abs(k.L.mean-k.R.mean) > 10) out.push(`Asymetria toru kolan: ${r(Math.abs(k.L.mean-k.R.mean))} mm różnicy między nogami.`);
+  return out;
+}
+
 function buildReport(h, fromHist){
   const sess = fromHist ? h : (lastSession || (measurements.length ? emptySession() : null));
   if(!sess){ $('#report').innerHTML = '<p style="color:#7a8594;margin:0">Nagraj sesję albo zapisz pomiary, potem kliknij „Odśwież raport”.</p>'; return; }
+  const bike = (sess.mode || 'rehab') === 'bike', type = sess.bike?.type || 'endurance';
   const T = TESTS[sess.testKey], P = fromHist ? (h.patient||{}) : patient(), notes = fromHist ? h.notes : $('#pNotes').value;
   const meas = fromHist ? (h.measurements||[]) : measurements;
   const st = sess.stats || {};
@@ -1125,35 +1415,43 @@ function buildReport(h, fromHist){
   const age = P.birth ? Math.floor((new Date(sess.date) - new Date(P.birth))/31557600000) : null;
   const prev = loadHist().filter(x => x.patient?.name && x.patient.name===P.name && x.testKey===sess.testKey && x.date < sess.date && x.id!==sess.id)
                          .sort((a,b)=>b.date.localeCompare(a.date))[0];
+  const small = t => `<br><small style="color:#7a8594">${t}</small>`;
+  // wartość z odchyleniem dla danych z obrotów
+  const show = (k, o, stat) => { if(!o) return '—'; const M = METRICS[k], v = o[stat];
+    return M.cyc && stat==='mean' ? `${fk(k,v)}<br><small style="color:#7a8594">±${Math.round(o.sd)}${M.unit && M.unit!=='°' ? '' : '°'}</small>` : fk(k,v); };
+  const nearTxt = s => bike && sess.view==='sag' && sess.near ? (s===sess.near ? '' : ' <small style="color:#7a8594">(dalej od kamery)</small>') : '';
 
   let normRows = '';
-  for(const n of T.norms){
+  for(const n0 of T.norms){
+    const n = normFor(n0, type);
     if(n.m==='_reps'){
       if(!sess.reps) continue;
-      normRows += `<tr><td>${n.label}<br><small style="color:#7a8594">${n.ref}</small></td><td class="cL">${sess.reps.L}</td><td class="cR">${sess.reps.R}</td><td>${fmt1(asym(sess.reps.L,sess.reps.R))}%</td><td>${TAG[judge(n,sess.reps.L)]||''}<br>${TAG[judge(n,sess.reps.R)]||''}</td></tr>`;
+      normRows += `<tr><td>${n.label}${small(n.ref)}</td><td class="cL">${sess.reps.L}</td><td class="cR">${sess.reps.R}</td><td>${fmt1(asym(sess.reps.L,sess.reps.R))}%</td><td>${TAG[judge(n,sess.reps.L)]||''}<br>${TAG[judge(n,sess.reps.R)]||''}</td></tr>`;
       continue;
     }
     const M = METRICS[n.m], s0 = st[n.m]; if(!s0) continue;
     if(n.asym){
       const a = s0.L?.[n.stat], b = s0.R?.[n.stat]; if(a==null||b==null) continue;
       const d = Math.abs(a-b), j = d<=5?'ok':d<=8?'warn':'bad';
-      normRows += `<tr><td>${n.label}<br><small style="color:#7a8594">${n.ref}</small></td><td colspan="3" style="text-align:center">${Math.round(d)}°</td><td>${TAG[j]}</td></tr>`;
+      normRows += `<tr><td>${n.label}${small(n.ref)}</td><td colspan="3" style="text-align:center">${Math.round(d)}°</td><td>${TAG[j]}</td></tr>`;
       continue;
     }
     if(M.sides){
       const a = s0.L?.[n.stat], b = s0.R?.[n.stat], as = asym(a,b);
-      normRows += `<tr><td>${n.label}<br><small style="color:#7a8594">${n.ref}</small></td><td class="cL">${fmt(a,M.signed)}</td><td class="cR">${fmt(b,M.signed)}</td><td>${as==null?'—':`${Math.round(as)}%${as>15?' ⚠':''}`}</td>
+      normRows += `<tr><td>${n.label}${small(n.ref)}</td><td class="cL">${show(n.m,s0.L,n.stat)}${nearTxt('L')}</td><td class="cR">${show(n.m,s0.R,n.stat)}${nearTxt('R')}</td><td>${as==null||bike?'—':`${Math.round(as)}%${as>15?' ⚠':''}`}</td>
         <td><span class="cL">L</span> ${TAG[judge(n,a)]||'—'}<br><span class="cR">P</span> ${TAG[judge(n,b)]||'—'}</td></tr>`;
     } else {
       const a = s0.S?.[n.stat];
-      normRows += `<tr><td>${n.label}<br><small style="color:#7a8594">${n.ref}</small></td><td colspan="3" style="text-align:center">${fmt(a,true)}</td><td>${TAG[judge(n,a)]||'—'}</td></tr>`;
+      normRows += `<tr><td>${n.label}${small(n.ref)}</td><td colspan="3" style="text-align:center">${show(n.m,s0.S,n.stat)}</td><td>${TAG[judge(n,a)]||'—'}</td></tr>`;
     }
   }
 
-  const keys = Object.keys(METRICS).filter(k=>METRICS[k].view===sess.view && st[k]);
+  const keys = keysFor(sess.view, sess.mode||'rehab').filter(k => st[k]);
   const fullRows = keys.map(k => {
-    const M = METRICS[k], c = s => st[k][s] ? `${fmt(st[k][s].min,true)} / ${fmt(st[k][s].max,true)}<br><b>${Math.round(st[k][s].rom)}°</b>` : '—';
-    return M.sides ? `<tr><td>${M.name}</td><td class="cL">${c('L')}</td><td class="cR">${c('R')}</td><td>${st[k].L&&st[k].R?Math.round(asym(st[k].L.rom,st[k].R.rom))+'%':'—'}</td></tr>`
+    const M = METRICS[k];
+    const c = s => !st[k][s] ? '—' : M.cyc ? `${fk(k,st[k][s].mean)} ±${Math.round(st[k][s].sd)}<br><small style="color:#7a8594">${st[k][s].n} obr.</small>`
+                                            : `${fk(k,st[k][s].min,true)} / ${fk(k,st[k][s].max,true)}<br><b>${Math.round(st[k][s].rom)}${M.unit && M.unit!=='°' ? ' '+M.unit : '°'}</b>`;
+    return M.sides ? `<tr><td>${M.name}</td><td class="cL">${c('L')}</td><td class="cR">${c('R')}</td><td>${!M.cyc && st[k].L&&st[k].R?Math.round(asym(st[k].L.rom,st[k].R.rom))+'%':'—'}</td></tr>`
                    : `<tr><td>${M.name}</td><td colspan="2" style="text-align:center">${c('S')}</td><td></td></tr>`;
   }).join('');
 
@@ -1162,7 +1460,7 @@ function buildReport(h, fromHist){
     const rows = T.norms.filter(n=>n.m && n.m[0]!=='_' && !n.asym && st[n.m] && prev.stats?.[n.m]).map(n => {
       const M = METRICS[n.m];
       const cell = s => { const a = st[n.m][s]?.[n.stat], b = prev.stats[n.m][s]?.[n.stat]; if(a==null||b==null) return '—';
-        const d = a-b; return `${fmt(b,M.signed)} → <b>${fmt(a,M.signed)}</b> <small>(${d>=0?'+':''}${Math.round(d)}°)</small>`; };
+        const d = a-b; return `${fk(n.m,b)} → <b>${fk(n.m,a)}</b> <small>(${d>=0?'+':''}${Math.round(d)}${M.unit && M.unit!=='°' ? ' '+M.unit : '°'})</small>`; };
       return `<tr><td>${n.label}</td>${M.sides ? `<td>${cell('L')}</td><td>${cell('R')}</td>` : `<td colspan="2" style="text-align:center">${cell('S')}</td>`}</tr>`;
     }).join('');
     if(rows) cmp = `<h3>Porównanie z ${new Date(prev.date).toLocaleDateString('pl-PL')}</h3>
@@ -1172,26 +1470,37 @@ function buildReport(h, fromHist){
   let chartImg = '';
   if(!fromHist && sess.samples?.length){
     const c = document.createElement('canvas');
-    chartImg = T.primary.filter(m=>METRICS[m].view===sess.view).slice(0,2).map(m => {
+    const cm = bike ? (sess.view==='sag' ? ['knee','hipAng'] : ['pelvis']) : T.primary.filter(m=>METRICS[m].view===sess.view).slice(0,2);
+    chartImg = cm.map(m => {
       drawChart(c, {metric:m, session:sess, w:800, h:240, dpr:2, light:true});
-      return `<p style="margin:10px 0 4px;font-weight:600">${METRICS[m].name} <span style="font-weight:400;color:#7a8594">(<span class="cL">lewa</span>, <span class="cR">prawa</span>, tło morskie = norma)</span></p><img class="chartimg" src="${c.toDataURL('image/png')}" alt="">`;
+      return `<p style="margin:10px 0 4px;font-weight:600">${METRICS[m].name} <span style="font-weight:400;color:#7a8594">(<span class="cL">lewa</span>, <span class="cR">prawa</span>${bike?'':', tło morskie = norma'})</span></p><img class="chartimg" src="${c.toDataURL('image/png')}" alt="">`;
     }).join('');
   }
 
   const imgs = [];
   if(!fromHist){
-    for(const s of sess.snapshots||[]) imgs.push(`<figure><img src="${s.img}" alt=""><figcaption>Szczyt – ${METRICS[s.m].name}, ${s.side==='L'?'lewa':s.side==='R'?'prawa':''}: <b>${fmt(s.v,true)}</b></figcaption></figure>`);
+    for(const s of sess.snapshots||[]) imgs.push(`<figure><img src="${s.img}" alt=""><figcaption>${bike ? 'Dolny punkt obrotu' : 'Szczyt – '+METRICS[s.m].name}, ${s.side==='L'?'lewa':s.side==='R'?'prawa':''}: <b>${fk(s.m,s.v,true)}</b></figcaption></figure>`);
     for(const m of meas) imgs.push(`<figure><img src="${m.img}" alt=""><figcaption><b>${esc(m.label)}</b></figcaption></figure>`);
   }
   let measTbl = '';
   if(meas.length){
-    const mk = Object.keys(METRICS).filter(k=>METRICS[k].view===(meas[0].view||sess.view));
-    measTbl = `<div class="tw"><table><tr><th>Pomiar</th>${mk.map(k=>`<th>${METRICS[k].short}${METRICS[k].sides?'<br>L / P':''}</th>`).join('')}</tr>${meas.map(m=>`<tr><td>${esc(m.label)}</td>${mk.map(k=>`<td>${METRICS[k].sides?`<span class="cL">${fmt(m.L[k],METRICS[k].signed)}</span> / <span class="cR">${fmt(m.R[k],METRICS[k].signed)}</span>`:fmt(m.S[k],true)}</td>`).join('')}</tr>`).join('')}</table></div>`;
+    const mk = keysFor(meas[0].view||sess.view, meas[0].mode||'rehab').filter(k=>!METRICS[k].cyc);
+    measTbl = `<div class="tw"><table><tr><th>Pomiar</th>${mk.map(k=>`<th>${METRICS[k].short}${METRICS[k].sides?'<br>L / P':''}</th>`).join('')}</tr>${meas.map(m=>`<tr><td>${esc(m.label)}</td>${mk.map(k=>`<td>${METRICS[k].sides?`<span class="cL">${fk(k,m.L[k])}</span> / <span class="cR">${fk(k,m.R[k])}</span>`:fk(k,m.S[k],true)}</td>`).join('')}</tr>`).join('')}</table></div>`;
   }
 
-  $('#report').innerHTML = `
-    <div class="rh">${$('#logoTpl').innerHTML}<div><h1>Raport analizy ruchu</h1>
-      <div style="color:#5b6676">${T.name} · ${new Date(sess.date).toLocaleString('pl-PL')}</div></div></div>
+  const advice = bike && sess.cycles ? bikeAdvice(sess) : [];
+  const personBlock = bike ? `
+    <h3>Klient i rower</h3>
+    <div class="kv">
+      <div><span>Imię i nazwisko</span>${esc(P.name)||'—'}</div>
+      <div><span>Wiek</span>${age!=null?age+' lat':'—'}</div>
+      <div><span>Rower</span>${esc(P.bike)||'—'}</div>
+      <div><span>Typ / pozycja</span>${BIKE_TYPES[type]}</div>
+      <div><span>Długość korby</span>${sess.bike?.crank ? sess.bike.crank+' mm' : '—'}</div>
+      <div><span>Wysokość siodła</span>${P.saddle ? esc(P.saddle)+' mm' : '—'}</div>
+      <div><span>Cel / dolegliwości</span>${esc(P.goal)||'—'}</div>
+      <div><span>Fitter</span>${esc(P.ther)||'—'}</div>
+    </div>` : `
     <h3>Pacjent</h3>
     <div class="kv">
       <div><span>Imię i nazwisko</span>${esc(P.name)||'—'}</div>
@@ -1200,23 +1509,34 @@ function buildReport(h, fromHist){
       <div><span>Rozpoznanie</span>${esc(P.diag)||'—'}</div>
       <div><span>Etap</span>${esc(P.stage)||'—'}</div>
       <div><span>Terapeuta</span>${esc(P.ther)||'—'}</div>
-    </div>
+    </div>`;
+
+  $('#report').innerHTML = `
+    <div class="rh">${$('#logoTpl').innerHTML}<div><h1>${bike ? 'Raport bike fittingu' : 'Raport analizy ruchu'}</h1>
+      <div style="color:#5b6676">${T.name} · ${new Date(sess.date).toLocaleString('pl-PL')}</div></div></div>
+    ${personBlock}
     <h3>Badanie</h3>
     <div class="kv">
       <div><span>Płaszczyzna</span>${sess.view==='sag'?'strzałkowa (z boku)':'czołowa (z przodu)'}</div>
       <div><span>Nagranie</span>${sess.duration?sess.duration.toFixed(1)+' s · '+sess.frames+' kl.':'pomiary punktowe'}</div>
+      ${bike && sess.cycles!=null ? `<div><span>Obroty korby</span>${sess.cycles}</div>` : ''}
+      ${bike && sess.view==='sag' && sess.near ? `<div><span>Mierzona strona</span>${sess.near==='L'?'lewa':'prawa'} (bliżej kamery)</div>` : ''}
       <div><span>Model</span>MediaPipe Pose ${sess.model}</div>
-      <div><span>Kalibracja 0°</span>${sess.calibrated?'tak':'nie'}</div>
+      ${bike ? '' : `<div><span>Kalibracja 0°</span>${sess.calibrated?'tak':'nie'}</div>`}
       ${sess.reps?`<div><span>Powtórzenia</span>L ${sess.reps.L} · P ${sess.reps.R}</div>`:''}
     </div>
-    ${normRows?`<h3>Wyniki a norma</h3><div class="tw"><table><tr><th>Parametr</th><th class="cL">L</th><th class="cR">P</th><th>Asym.</th><th>Ocena</th></tr>${normRows}</table></div>`:''}
-    ${fullRows?`<h3>Zakresy ruchu (min / maks, zakres)</h3><div class="tw"><table><tr><th>Kąt</th><th class="cL">Lewa</th><th class="cR">Prawa</th><th>Asym.</th></tr>${fullRows}</table></div>`:''}
+    ${normRows?`<h3>${bike?'Wyniki a zakresy docelowe':'Wyniki a norma'}</h3><div class="tw"><table><tr><th>Parametr</th><th class="cL">L</th><th class="cR">P</th><th>Asym.</th><th>Ocena</th></tr>${normRows}</table></div>`:''}
+    ${advice.length?`<h3>Proponowane zmiany</h3><ol style="margin:0;padding-left:20px">${advice.map(a=>`<li style="margin-bottom:6px">${a}</li>`).join('')}</ol><p style="color:#7a8594;font-size:11.5px">Wartości w mm są orientacyjne (ok. 2,5 mm wysokości siodła na 1° kąta kolana). Zmieniaj jedną rzecz naraz i po każdej zmianie zrób ponowny pomiar.</p>`
+      : (bike && sess.cycles ? `<h3>Proponowane zmiany</h3><p>Wszystkie mierzone parametry mieszczą się w zakresach docelowych – pozycja nie wymaga zmian.</p>` : '')}
+    ${fullRows?`<h3>${bike?'Wszystkie pomiary':'Zakresy ruchu (min / maks, zakres)'}</h3><div class="tw"><table><tr><th>Kąt</th><th class="cL">Lewa</th><th class="cR">Prawa</th><th>Asym.</th></tr>${fullRows}</table></div>`:''}
     ${measTbl?`<h3>Pomiary punktowe</h3>${measTbl}`:''}
     ${cmp}
     ${chartImg?`<h3>Przebieg kątów</h3>${chartImg}`:''}
     ${imgs.length?`<h3>Zdjęcia</h3><div class="imgs">${imgs.join('')}</div>`:''}
-    ${notes?`<h3>Wnioski i zalecenia</h3><div class="note">${esc(notes)}</div>`:''}
-    <p class="disc">Pomiar markerless (obraz 2D z jednej kamery, MediaPipe Pose). Wartości orientacyjne, mogą różnić się od goniometru o kilka stopni. Raport nie stanowi diagnozy medycznej. Asymetria &gt; 15% oznaczona ⚠. Normy: AAOS, Bennell i in. (1998), Lunsford i Perry (1995), literatura FPPA.<br>BikeRc · ${new Date().toLocaleString('pl-PL')}</p>`;
+    ${notes?`<h3>${bike?'Uwagi fittera':'Wnioski i zalecenia'}</h3><div class="note">${esc(notes)}</div>`:''}
+    <p class="disc">${bike
+      ? 'Pomiar markerless (obraz 2D z jednej kamery, MediaPipe Pose). Kąty z obrotów korby to średnia ± odchylenie standardowe; wartości w mm przeliczone z długości korby. Zakresy docelowe są punktem wyjścia – ostateczna pozycja zależy od mobilności, celów i odczuć kolarza. Krzywizny kręgosłupa nie są mierzone (tylko linia biodro–bark i odcinek szyjny).'
+      : 'Pomiar markerless (obraz 2D z jednej kamery, MediaPipe Pose). Wartości orientacyjne, mogą różnić się od goniometru o kilka stopni. Raport nie stanowi diagnozy medycznej. Asymetria &gt; 15% oznaczona ⚠. Normy: AAOS, Bennell i in. (1998), Lunsford i Perry (1995), literatura FPPA.'}<br>BikeRc · ${new Date().toLocaleString('pl-PL')}</p>`;
 }
 $('#genReport').onclick = () => { if(recording) toggleRec(); buildReport(); toast('Raport odświeżony.'); };
 $('#printBtn').onclick = () => { if(!$('#report .rh')) buildReport(); setTimeout(()=>window.print(), 50); };
@@ -1230,17 +1550,17 @@ async function shareOrDownload(name, text, type){
   }catch(e){ if(e.name==='AbortError') return; }
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),4000);
 }
-const fname = ext => `bikerc-rehab-${(patient().name||'pacjent').replace(/\s+/g,'_')}-${new Date().toISOString().slice(0,16).replace(/[:T]/g,'-')}.${ext}`;
+const fname = ext => `bikerc-${mode==='bike'?'fitting':'rehab'}-${(patient().name||'pacjent').replace(/\s+/g,'_')}-${new Date().toISOString().slice(0,16).replace(/[:T]/g,'-')}.${ext}`;
 $('#csvBtn').onclick = () => {
   if(!lastSession){ toast('Brak nagranej sesji.'); return; }
-  const cols = []; for(const k in METRICS) for(const s of sidesOf(k)) cols.push([k,s]);
+  const cols = []; for(const k of keysFor(lastSession.view, lastSession.mode||'rehab')) if(!METRICS[k].cyc) for(const s of sidesOf(k)) cols.push([k,s]);
   const head = ['czas_s', ...cols.map(([k,s])=>`${k}_${s==='L'?'lewa':s==='R'?'prawa':'wartosc'}`)].join(';');
   const rows = lastSession.samples.map(d => [d.t.toFixed(3), ...cols.map(([k,s])=>d[s]?.[k]==null?'':d[s][k].toFixed(1).replace('.',','))].join(';'));
   shareOrDownload(fname('csv'), '﻿'+[head,...rows].join('\n'), 'text/csv');
 };
 
 /* ---------- start ---------- */
-buildAllTable(); buildChartSel(); setTest('free');
+setMode(mode, true);
 if(!window.isSecureContext) setTimeout(()=>toast('Strona otwarta bez https – kamera może nie działać. Wideo z galerii działa.', 6000), 1500);
 </script>
 </body>
