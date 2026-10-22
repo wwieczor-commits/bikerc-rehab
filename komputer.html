@@ -1,0 +1,1211 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BikeRc Rehab – analiza ruchu stopy i nogi</title>
+<style>
+/* =========================================================
+   KOLORYSTYKA – podmień tutaj na barwy BikeRc
+   ========================================================= */
+:root{
+  --bg:#0b0e13;
+  --panel:#131820;
+  --panel2:#1a212c;
+  --line:#263041;
+  --text:#e8edf4;
+  --muted:#8b97a8;
+  --accent:#ff5a1f;      /* główny kolor marki */
+  --accent-soft:rgba(255,90,31,.14);
+  --ok:#22c55e;
+  --warn:#f59e0b;
+  --bad:#ef4444;
+  --left:#38bdf8;        /* noga lewa */
+  --right:#f472b6;       /* noga prawa */
+  --radius:14px;
+  --font:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font);font-size:15px;line-height:1.45}
+button,select,input,textarea{font:inherit;color:inherit}
+a{color:var(--accent)}
+.wrap{max-width:1500px;margin:0 auto;padding:16px}
+
+/* ---------- nagłówek ---------- */
+header.top{display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:12px 16px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#10151c,var(--bg))}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--text)}
+.logo svg{width:44px;height:44px}
+.logo .word{font-weight:800;font-size:24px;letter-spacing:-.5px}
+.logo .word b{color:var(--accent)}
+.logo .sub{display:block;font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);font-weight:600;margin-top:-2px}
+.top .title{flex:1;min-width:220px}
+.top .title h1{margin:0;font-size:17px;font-weight:650}
+.top .title p{margin:0;color:var(--muted);font-size:13px}
+.pill{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:999px;background:var(--panel2);border:1px solid var(--line);font-size:13px;color:var(--muted)}
+.pill .dot{width:9px;height:9px;border-radius:50%;background:var(--muted)}
+.pill.ok .dot{background:var(--ok);box-shadow:0 0 8px var(--ok)}
+.pill.busy .dot{background:var(--warn);animation:blink 1s infinite}
+.pill.err .dot{background:var(--bad)}
+@keyframes blink{50%{opacity:.3}}
+
+/* ---------- układ ---------- */
+.grid{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(320px,1fr);gap:16px;align-items:start}
+@media (max-width:1050px){.grid{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px}
+.card h2{margin:0 0 10px;font-size:13px;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted);font-weight:700}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.row + .row{margin-top:8px}
+.sp{flex:1}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted)}
+select,input[type=text],input[type=date],input[type=number],textarea{background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:8px 10px;outline:none}
+select:focus,input:focus,textarea:focus{border-color:var(--accent)}
+textarea{resize:vertical;min-height:70px;width:100%}
+.btn{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:8px 14px;cursor:pointer;font-weight:600;white-space:nowrap;transition:.15s}
+.btn:hover{border-color:var(--accent)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.primary:hover{filter:brightness(1.1)}
+.btn.rec.on{background:var(--bad);border-color:var(--bad);color:#fff}
+.btn.small{padding:5px 10px;font-size:13px}
+.chk{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);cursor:pointer}
+.chk input{accent-color:var(--accent)}
+.seg{display:inline-flex;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:3px}
+.seg button{background:none;border:0;padding:6px 12px;border-radius:7px;cursor:pointer;color:var(--muted);font-weight:600}
+.seg button.on{background:var(--accent);color:#fff}
+
+/* ---------- podgląd wideo ---------- */
+.stage{position:relative;background:#000;border-radius:12px;overflow:hidden;aspect-ratio:16/9;margin:10px 0;display:flex;align-items:center;justify-content:center}
+.stage canvas{width:100%;height:100%;object-fit:contain;display:block}
+.stage video{display:none}
+.stage .ph{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--muted);text-align:center;padding:20px}
+.stage .ph strong{color:var(--text);font-size:18px}
+.badge{position:absolute;top:10px;padding:4px 10px;border-radius:8px;background:rgba(0,0,0,.6);font-size:12px;font-weight:600}
+.badge.fps{left:10px}
+.badge.recb{right:10px;background:var(--bad);display:none}
+.badge.recb.on{display:block;animation:blink 1.2s infinite}
+.badge.cal{left:10px;top:40px;background:var(--accent-soft);color:var(--accent);display:none}
+.badge.cal.on{display:block}
+.filebar{display:none;gap:10px;align-items:center}
+.filebar.on{display:flex}
+.filebar input[type=range]{flex:1;accent-color:var(--accent)}
+.mono{font-variant-numeric:tabular-nums}
+
+/* ---------- karty kątów ---------- */
+.testdesc{background:var(--panel2);border-radius:10px;padding:10px 12px;font-size:13px;color:var(--muted);margin-top:8px}
+.testdesc b{color:var(--text)}
+.hero{display:grid;gap:10px;margin-top:12px}
+.hcard{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.hcard .hn{display:flex;justify-content:space-between;font-size:13px;font-weight:650}
+.hcard .hn span{color:var(--muted);font-weight:500;font-size:12px}
+.hvals{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px}
+.hv{border-radius:10px;padding:6px 10px;background:rgba(255,255,255,.03)}
+.hv small{font-size:11px;color:var(--muted);display:flex;justify-content:space-between}
+.hv .big{font-size:34px;font-weight:800;letter-spacing:-1px}
+.hv.L{border-left:4px solid var(--left)}
+.hv.R{border-left:4px solid var(--right)}
+.hv.S{grid-column:1/-1;border-left:4px solid var(--accent)}
+.bar{position:relative;height:6px;border-radius:4px;background:var(--line);margin-top:4px;overflow:hidden}
+.bar i{position:absolute;top:0;bottom:0;background:rgba(34,197,94,.35)}
+.bar b{position:absolute;top:-2px;width:3px;height:10px;background:var(--text);border-radius:2px}
+.reps{font-size:12px;color:var(--muted);margin-top:4px}
+.reps b{color:var(--text);font-size:15px}
+table.m{width:100%;border-collapse:collapse;font-size:13px}
+table.m th,table.m td{padding:6px 6px;border-bottom:1px solid var(--line);text-align:right}
+table.m th:first-child,table.m td:first-child{text-align:left}
+table.m th{color:var(--muted);font-weight:600;font-size:12px}
+table.m td small{color:var(--muted)}
+.cL{color:var(--left)} .cR{color:var(--right)}
+.q{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px;vertical-align:middle}
+
+/* ---------- zakładki ---------- */
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin:18px 0 0;flex-wrap:wrap}
+.tabs button{background:none;border:0;border-bottom:2px solid transparent;padding:10px 14px;color:var(--muted);font-weight:650;cursor:pointer}
+.tabs button.on{color:var(--text);border-color:var(--accent)}
+.tab{display:none;padding-top:14px}
+.tab.on{display:block}
+.chartbox{position:relative;height:300px}
+.chartbox canvas{width:100%;height:100%}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--muted)}
+.legend i{display:inline-block;width:14px;height:3px;border-radius:2px;margin-right:5px;vertical-align:middle}
+.meas{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}
+.meas .mi{background:var(--panel2);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.meas .mi img{width:100%;display:block}
+.meas .mi div{padding:8px 10px;font-size:12px}
+.meas .mi input{width:100%;margin-bottom:6px}
+.form{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
+.hist{width:100%;border-collapse:collapse;font-size:13px}
+.hist td,.hist th{padding:7px;border-bottom:1px solid var(--line);text-align:left}
+.hist th{color:var(--muted);font-weight:600}
+.muted{color:var(--muted)}
+.help{font-size:13px;color:var(--muted)}
+.help li{margin-bottom:4px}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--panel2);border:1px solid var(--accent);padding:10px 18px;border-radius:10px;opacity:0;pointer-events:none;transition:.25s;z-index:99}
+.toast.on{opacity:1}
+
+/* ---------- raport (zawsze jasny – jak dokument) ---------- */
+#report{background:#fff;color:#1b2430;border-radius:12px;padding:32px;max-width:1000px;margin:0 auto;font-size:13.5px}
+#report h1{font-size:22px;margin:0}
+#report h3{font-size:14px;text-transform:uppercase;letter-spacing:1.2px;color:#5b6676;border-bottom:2px solid var(--accent);padding-bottom:4px;margin:24px 0 10px}
+#report table{width:100%;border-collapse:collapse}
+#report th,#report td{border-bottom:1px solid #e3e7ec;padding:6px 8px;text-align:right}
+#report th:first-child,#report td:first-child{text-align:left}
+#report th{background:#f4f6f8;font-weight:600;color:#475263}
+#report .rh{display:flex;justify-content:space-between;align-items:center;gap:20px;border-bottom:1px solid #e3e7ec;padding-bottom:14px}
+#report .rh .logo{color:#1b2430}
+#report .kv{display:grid;grid-template-columns:repeat(3,1fr);gap:6px 20px}
+#report .kv div span{display:block;color:#7a8594;font-size:11px;text-transform:uppercase;letter-spacing:.8px}
+#report .tag{display:inline-block;padding:2px 8px;border-radius:6px;font-size:12px;font-weight:600}
+#report .t-ok{background:#dcfce7;color:#166534}
+#report .t-warn{background:#fef3c7;color:#92400e}
+#report .t-bad{background:#fee2e2;color:#991b1b}
+#report .imgs{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+#report .imgs figure{margin:0}
+#report .imgs img{width:100%;border-radius:6px;display:block}
+#report .imgs figcaption{font-size:11.5px;color:#5b6676;margin-top:3px}
+#report .chartimg{width:100%;border:1px solid #e3e7ec;border-radius:8px}
+#report .note{white-space:pre-wrap;background:#f6f7f9;border-radius:8px;padding:10px 12px}
+#report .disc{font-size:11px;color:#7a8594;margin-top:24px}
+#report .cL{color:#0284c7} #report .cR{color:#db2777}
+
+@media print{
+  @page{size:A4;margin:12mm}
+  body{background:#fff}
+  body > *:not(.wrap){display:none!important}
+  .wrap > *:not(#tabsArea){display:none!important}
+  #tabsArea > *:not(#tab-report){display:none!important}
+  #tab-report{display:block!important;padding:0}
+  #tab-report .noprint{display:none!important}
+  #report{padding:0;max-width:none;border-radius:0}
+  #report h3{break-after:avoid}
+  #report .imgs figure,#report table{break-inside:avoid}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style>
+</head>
+<body>
+
+<!-- Logo BikeRc (SVG) – możesz podmienić na <img src="logo.png"> -->
+<template id="logoTpl">
+  <span class="logo">
+    <svg viewBox="0 0 48 48" aria-hidden="true">
+      <circle cx="24" cy="24" r="20" fill="none" stroke="var(--accent)" stroke-width="3.5"/>
+      <circle cx="24" cy="24" r="4" fill="var(--accent)"/>
+      <g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" opacity=".85">
+        <line x1="24" y1="24" x2="24" y2="6"/><line x1="24" y1="24" x2="39.6" y2="33"/><line x1="24" y1="24" x2="8.4" y2="33"/>
+      </g>
+      <path d="M9 13 A20 20 0 0 1 20 4.4" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/>
+    </svg>
+    <span><span class="word">Bike<b>Rc</b></span><span class="sub">Rehab · Motion Lab</span></span>
+  </span>
+</template>
+
+<header class="top">
+  <div id="logoTop"></div>
+  <div class="title">
+    <h1>Analiza ruchu stopy i nogi – rehabilitacja</h1>
+    <p>Pomiar kątów na żywo z kamery lub wideo · raport dla pacjenta</p>
+  </div>
+  <span class="pill" id="status"><span class="dot"></span><span id="statusTxt">Model nie jest załadowany</span></span>
+</header>
+
+<div class="wrap">
+  <div class="grid">
+    <!-- =============== LEWA KOLUMNA: OBRAZ =============== -->
+    <section class="card">
+      <div class="row">
+        <div class="seg" id="srcSeg">
+          <button data-v="cam" class="on">Kamera</button>
+          <button data-v="file">Plik wideo</button>
+        </div>
+        <select id="camSel" title="Wybór kamery"><option value="">Domyślna kamera</option></select>
+        <button class="btn primary" id="camBtn">Uruchom kamerę</button>
+        <label class="btn" id="fileBtn" style="display:none">Wczytaj wideo…<input type="file" id="fileIn" accept="video/*" hidden></label>
+        <span class="sp"></span>
+        <label class="f">Model
+          <select id="modelSel">
+            <option value="heavy" selected>Heavy – najdokładniejszy</option>
+            <option value="full">Full – zbalansowany</option>
+            <option value="lite">Lite – najszybszy</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="stage" id="stage">
+        <video id="video" playsinline muted></video>
+        <canvas id="view"></canvas>
+        <div class="ph" id="ph"><strong>Uruchom kamerę albo wczytaj nagranie</strong><span>Ustaw kamerę bokiem do pacjenta na wysokości kolana, ok. 2–3 m od niego. Cała noga ze stopą musi być w kadrze.</span></div>
+        <span class="badge fps mono" id="fps">— fps</span>
+        <span class="badge cal" id="calBadge">skalibrowano</span>
+        <span class="badge recb" id="recBadge">● REC 0.0 s</span>
+      </div>
+
+      <div class="filebar" id="filebar">
+        <button class="btn small" id="playBtn">▶</button>
+        <input type="range" id="seek" min="0" max="1000" value="0">
+        <span class="mono muted" id="tlab">0.0 / 0.0 s</span>
+        <select id="rate" title="Prędkość odtwarzania">
+          <option value="0.25">0.25×</option><option value="0.5">0.5×</option><option value="1" selected>1×</option>
+        </select>
+        <button class="btn small" id="stepBtn" title="Następna klatka">⏭ klatka</button>
+      </div>
+
+      <div class="row" style="margin-top:8px">
+        <div class="seg" id="viewSeg" title="Płaszczyzna pomiaru">
+          <button data-v="sag" class="on">Widok z boku</button>
+          <button data-v="front">Widok z przodu</button>
+        </div>
+        <label class="chk"><input type="checkbox" id="mirror" checked> Lustro</label>
+        <label class="chk" title="Gdy model pomyli lewą i prawą nogę"><input type="checkbox" id="swap"> Zamień L/P</label>
+        <label class="f" style="flex-direction:row;align-items:center;gap:6px">Wygładzanie
+          <select id="smooth"><option value="3">słabe</option><option value="1.5" selected>średnie</option><option value="0.6">mocne</option></select>
+        </label>
+        <span class="sp"></span>
+        <button class="btn small" id="calBtn" title="Pacjent stoi prosto, stopy płasko – zeruje kąt kostki, stopy, miednicy i tułowia">Kalibruj pozycję neutralną</button>
+        <button class="btn small" id="calReset">Reset</button>
+      </div>
+
+      <div class="row" style="margin-top:12px">
+        <button class="btn rec" id="recBtn" disabled>● Nagrywaj sesję <small class="muted">(R)</small></button>
+        <button class="btn" id="snapBtn" disabled>Zapisz pomiar <small class="muted">(spacja)</small></button>
+        <span class="sp"></span>
+        <button class="btn primary" id="toReport">Generuj raport →</button>
+      </div>
+    </section>
+
+    <!-- =============== PRAWA KOLUMNA: KĄTY =============== -->
+    <aside class="card">
+      <h2>Test / protokół</h2>
+      <select id="testSel" style="width:100%"></select>
+      <div class="testdesc" id="testDesc"></div>
+      <div class="hero" id="hero"></div>
+      <h2 style="margin-top:16px">Wszystkie kąty</h2>
+      <table class="m" id="allTbl"></table>
+      <p class="muted" style="font-size:11.5px;margin:8px 0 0">Kropka przy wartości = pewność wykrycia punktów (zielona dobra, żółta średnia, czerwona słaba). Min/maks liczone są podczas nagrywania.</p>
+    </aside>
+  </div>
+
+  <!-- =============== ZAKŁADKI =============== -->
+  <div id="tabsArea">
+    <div class="tabs" id="tabs">
+      <button data-t="chart" class="on">Wykres</button>
+      <button data-t="meas">Pomiary i zdjęcia</button>
+      <button data-t="patient">Pacjent i historia</button>
+      <button data-t="report">Raport</button>
+      <button data-t="help">Jak mierzyć</button>
+    </div>
+
+    <div class="tab on" id="tab-chart">
+      <div class="card">
+        <div class="row">
+          <label class="f" style="flex-direction:row;align-items:center;gap:8px">Parametr <select id="chartSel"></select></label>
+          <div class="legend"><span><i style="background:var(--left)"></i>Lewa</span><span><i style="background:var(--right)"></i>Prawa</span><span><i style="background:var(--accent)"></i>Jedna wartość</span><span><i style="background:rgba(34,197,94,.4);height:8px"></i>Zakres normy</span></div>
+          <span class="sp"></span><span class="muted" id="chartInfo" style="font-size:12px">Podgląd na żywo – ostatnie 10 s</span>
+        </div>
+        <div class="chartbox"><canvas id="chart"></canvas></div>
+      </div>
+    </div>
+
+    <div class="tab" id="tab-meas">
+      <div class="card">
+        <p class="muted" style="margin-top:0">„Zapisz pomiar” (lub spacja) zapisuje bieżące kąty razem ze zdjęciem – np. maksymalne zgięcie grzbietowe, potem podeszwowe. Podczas nagrywania program sam robi zdjęcia w momentach szczytowych.</p>
+        <div class="meas" id="measList"></div>
+      </div>
+    </div>
+
+    <div class="tab" id="tab-patient">
+      <div class="card">
+        <h2>Dane pacjenta</h2>
+        <div class="form">
+          <label class="f">Imię i nazwisko<input type="text" id="pName"></label>
+          <label class="f">Data urodzenia<input type="date" id="pBirth"></label>
+          <label class="f">Strona leczona
+            <select id="pSide"><option value="">—</option><option value="L">Lewa</option><option value="R">Prawa</option><option value="B">Obie</option></select></label>
+          <label class="f">Rozpoznanie / uraz<input type="text" id="pDiag" placeholder="np. skręcenie stawu skokowego, rekonstrukcja ACL"></label>
+          <label class="f">Etap rehabilitacji<input type="text" id="pStage" placeholder="np. 6 tydzień po zabiegu"></label>
+          <label class="f">Terapeuta<input type="text" id="pTher"></label>
+        </div>
+        <label class="f" style="margin-top:10px">Wnioski i zalecenia (trafią do raportu)<textarea id="pNotes" rows="4"></textarea></label>
+      </div>
+      <div class="card" style="margin-top:14px">
+        <div class="row"><h2 style="margin:0">Historia sesji</h2><span class="sp"></span>
+          <button class="btn small" id="histExport">Eksport historii (JSON)</button>
+          <label class="btn small">Import…<input type="file" id="histImport" accept="application/json" hidden></label>
+        </div>
+        <p class="muted" style="font-size:12px">Historia jest zapisywana tylko w tej przeglądarce. Aby przenieść ją na inny komputer, użyj eksportu i importu.</p>
+        <div style="overflow-x:auto"><table class="hist" id="histTbl"></table></div>
+      </div>
+    </div>
+
+    <div class="tab" id="tab-report">
+      <div class="row noprint" style="margin-bottom:12px">
+        <button class="btn primary" id="genReport">Odśwież raport z bieżącej sesji</button>
+        <button class="btn" id="printBtn">Drukuj / zapisz PDF</button>
+        <button class="btn" id="saveHist">Zapisz sesję w historii</button>
+        <button class="btn" id="csvBtn">Eksport danych (CSV)</button>
+        <button class="btn" id="jsonBtn">Eksport sesji (JSON)</button>
+      </div>
+      <div id="report"><p style="color:#7a8594">Nagraj sesję (przycisk „Nagrywaj”) albo zapisz pomiary, a potem kliknij „Odśwież raport”.</p></div>
+    </div>
+
+    <div class="tab" id="tab-help">
+      <div class="card help">
+        <h2>Ustawienie stanowiska</h2>
+        <ul>
+          <li><b>Widok z boku</b> (kostka, kolano, biodro, chód): kamera prostopadle do pacjenta, na wysokości kolana, 2–3 m. Badana noga bliżej kamery.</li>
+          <li><b>Widok z przodu</b> (koślawość kolana, miednica): kamera na wprost, na wysokości kolan, pacjent przodem.</li>
+          <li>Dobre, równe światło z przodu. Unikaj okna za pacjentem.</li>
+          <li>Krótkie spodenki, pacjent boso lub w kontrastowych skarpetach. Tło jednolite.</li>
+          <li>Do chodu i biegu najlepiej kamera 60 fps. Możesz też nagrać telefonem w zwolnionym tempie i wczytać plik.</li>
+          <li>Przed testem kostki kliknij <b>Kalibruj pozycję neutralną</b>, gdy pacjent stoi prosto, stopy płasko. Kąt kostki i stopy będzie wtedy liczony od jego pozycji 0°.</li>
+        </ul>
+        <h2>Jak liczone są kąty</h2>
+        <ul>
+          <li><b>Zgięcie kolana</b> – kąt między udem a podudziem (0° = noga prosta).</li>
+          <li><b>Zgięcie biodra</b> – kąt uda względem linii tułowia (+ zgięcie, − wyprost).</li>
+          <li><b>Kostka</b> – kąt podudzia do linii pięta–palce, przeliczony na: + zgięcie grzbietowe, − zgięcie podeszwowe.</li>
+          <li><b>Pochylenie goleni</b> – kąt podudzia od pionu (test knee‑to‑wall / wykrok).</li>
+          <li><b>FPPA</b> – kąt projekcji kolana w płaszczyźnie czołowej (+ koślawość / valgus).</li>
+        </ul>
+        <h2>Model AI</h2>
+        <p>Aplikacja używa <b>Google MediaPipe Pose Landmarker (Heavy)</b>. Wybrałem go, bo jako jeden z niewielu modeli działa w całości w przeglądarce (nagrania pacjenta nie wychodzą z komputera, co ma znaczenie dla RODO), działa w czasie rzeczywistym na GPU i wykrywa 33 punkty – w tym <b>piętę i palce stopy</b>, bez których nie da się zmierzyć kąta w stawie skokowym. Popularne modele typu COCO (np. MoveNet, RTMPose‑17) kończą się na kostce.</p>
+        <p class="muted">To pomiar 2D z jednej kamery. Wyniki są orientacyjne, nie zastępują goniometru ani badania lekarskiego. Kąty są najdokładniejsze, gdy ruch odbywa się w płaszczyźnie prostopadłej do kamery.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+/* =========================================================
+   KONFIGURACJA
+   ========================================================= */
+const MP_VER = '0.10.14';
+const CDN = `https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@${MP_VER}`;
+const MODEL_URLS = {
+  heavy: 'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_heavy/float16/1/pose_landmarker_heavy.task',
+  full:  'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_full/float16/1/pose_landmarker_full.task',
+  lite:  'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task'
+};
+const HIST_KEY = 'bikerc_rehab_history_v1';
+const PATIENT_KEY = 'bikerc_rehab_patient_v1';
+const VIS_MIN = 0.45;
+
+// indeksy punktów MediaPipe
+const IDX = {
+  L: {sh:11, hip:23, knee:25, ank:27, heel:29, toe:31},
+  R: {sh:12, hip:24, knee:26, ank:28, heel:30, toe:32}
+};
+
+/* ---------- definicje kątów ---------- */
+const METRICS = {
+  knee:     {name:'Zgięcie kolana',            short:'Kolano',   sides:true,  view:'sag',   hint:'0° = prosto, + zgięcie, − przeprost', range:[-10,150]},
+  hip:      {name:'Zgięcie biodra',            short:'Biodro',   sides:true,  view:'sag',   hint:'+ zgięcie, − wyprost',               range:[-30,130]},
+  ankle:    {name:'Staw skokowy',              short:'Kostka',   sides:true,  view:'sag',   hint:'+ zgięcie grzbietowe, − podeszwowe', range:[-60,40], signed:true},
+  tibia:    {name:'Pochylenie goleni',         short:'Goleń',    sides:true,  view:'sag',   hint:'od pionu, + kolano do przodu',       range:[-20,60], signed:true},
+  foot:     {name:'Kąt stopy do podłoża',      short:'Stopa',    sides:true,  view:'sag',   hint:'+ palce w górę, − pięta w górę',     range:[-60,40], signed:true},
+  trunk:    {name:'Pochylenie tułowia',        short:'Tułów',    sides:false, view:'sag',   hint:'od pionu, + do przodu',              range:[-20,80], signed:true},
+  fppa:     {name:'Koślawość kolana (FPPA)',   short:'FPPA',     sides:true,  view:'front', hint:'+ koślawość (valgus), − szpotawość', range:[-20,30], signed:true},
+  pelvis:   {name:'Pochylenie miednicy',       short:'Miednica', sides:false, view:'front', hint:'+ lewy talerz niżej',                range:[-15,15], signed:true},
+  trunkLat: {name:'Boczne pochylenie tułowia', short:'Tułów bok',sides:false, view:'front', hint:'+ w lewo, − w prawo',                range:[-20,20], signed:true}
+};
+const CAL_KEYS = ['ankle','foot','pelvis','trunkLat'];
+
+/* ---------- protokoły testów + normy ---------- */
+const TESTS = {
+  free: {name:'Pomiar swobodny', view:'sag', primary:['knee','ankle','hip'],
+    desc:'Dowolny ruch. Widzisz wszystkie kąty na żywo. Wybierz widok z boku albo z przodu.', norms:[]},
+  ankleROM: {name:'Zakres ruchu stawu skokowego', view:'sag', primary:['ankle','foot','knee'], peak:{m:'ankle', dir:1},
+    desc:'<b>Pozycja:</b> siad na krawędzi stołu lub leżenie, noga bokiem do kamery. Najpierw kalibracja w pozycji 0°, potem maksymalne zgięcie grzbietowe (palce do siebie) i podeszwowe (palce od siebie). Zapisz pomiar w obu skrajnych pozycjach.',
+    norms:[
+      {m:'ankle', stat:'max', lo:15, label:'Maks. zgięcie grzbietowe', ref:'norma ok. 20° (AAOS)'},
+      {m:'ankle', stat:'min', hi:-35, label:'Maks. zgięcie podeszwowe', ref:'norma ok. 40–50° (AAOS)'}
+    ]},
+  lunge: {name:'Test wykroku przy ścianie (knee‑to‑wall)', view:'sag', primary:['tibia','ankle','knee'], rep:{m:'tibia', on:25, off:10}, peak:{m:'tibia', dir:1},
+    desc:'<b>Pozycja:</b> wykrok przodem do ściany, badana noga z przodu, bokiem do kamery. Pięta cały czas na podłodze, kolano dąży do ściany. Mierzymy pochylenie goleni od pionu. Wykonaj kilka powtórzeń.',
+    norms:[
+      {m:'tibia', stat:'max', lo:35, label:'Maks. pochylenie goleni', ref:'< 35° = ograniczone zgięcie grzbietowe (Bennell i in.)'},
+      {m:'tibia', stat:'max', asym:true, label:'Różnica L/P', ref:'różnica > 5° jest istotna'}
+    ]},
+  squat: {name:'Przysiad obunóż', view:'sag', primary:['knee','hip','ankle'], rep:{m:'knee', on:70, off:25}, peak:{m:'knee', dir:1},
+    desc:'<b>Pozycja:</b> pacjent bokiem do kamery, stopy na szerokość bioder. Wykonuje 5 spokojnych przysiadów tak głęboko, jak może, pięty na podłodze.',
+    norms:[
+      {m:'knee', stat:'max', lo:100, label:'Głębokość przysiadu (zgięcie kolana)', ref:'≥ 100° przysiad funkcjonalny'},
+      {m:'ankle', stat:'max', lo:20, label:'Zgięcie grzbietowe w przysiadzie', ref:'≥ 20° typowo potrzebne'},
+      {m:'trunk', stat:'max', hi:50, label:'Pochylenie tułowia', ref:'≤ 50° od pionu'}
+    ]},
+  sls: {name:'Przysiad jednonóż (widok z przodu)', view:'front', primary:['fppa','pelvis','trunkLat'], peak:{m:'fppa', dir:1},
+    desc:'<b>Pozycja:</b> pacjent przodem do kamery, stoi na jednej nodze, wykonuje 5 płytkich przysiadów (ok. 45–60° w kolanie). Oceniamy uciekanie kolana do środka i opadanie miednicy. Zrób test na obie nogi.',
+    norms:[
+      {m:'fppa', stat:'max', hi:10, warn:15, label:'Maks. koślawość kolana (FPPA)', ref:'≤ 10° prawidłowo, > 15° wysokie ryzyko'},
+      {m:'pelvis', stat:'absmax', hi:5, warn:8, label:'Opadanie / pochylenie miednicy', ref:'≤ 5°'},
+      {m:'trunkLat', stat:'absmax', hi:8, warn:12, label:'Boczne pochylenie tułowia', ref:'≤ 8°'}
+    ]},
+  heelRaise: {name:'Wspięcia na palce', view:'sag', primary:['ankle','foot','knee'], rep:{m:'foot', dir:-1, on:-15, off:-5}, peak:{m:'ankle', dir:-1},
+    desc:'<b>Pozycja:</b> bokiem do kamery, przy ścianie dla równowagi. Wspięcia na palce (obunóż albo na jednej nodze) do zmęczenia, w stałym rytmie. Program liczy powtórzenia i wysokość wspięcia.',
+    norms:[
+      {m:'ankle', stat:'min', hi:-25, label:'Zgięcie podeszwowe we wspięciu', ref:'≥ 25–30° wysokości'},
+      {m:'_reps', label:'Liczba powtórzeń', lo:25, ref:'~25 na jednej nodze (Lunsford i Perry)'}
+    ]},
+  gait: {name:'Chód na bieżni (widok z boku)', view:'sag', primary:['knee','ankle','hip'], rep:{m:'knee', on:40, off:15}, peak:{m:'knee', dir:1},
+    desc:'<b>Pozycja:</b> bieżnia bokiem do kamery, kamera na wysokości kolana. Nagrywaj min. 10 kroków przy stałej prędkości. Licznik pokazuje liczbę cykli chodu na każdą nogę.',
+    norms:[
+      {m:'knee', stat:'max', lo:55, hi:70, label:'Maks. zgięcie kolana (przenoszenie)', ref:'ok. 60°'},
+      {m:'ankle', stat:'max', lo:5, hi:18, label:'Maks. zgięcie grzbietowe (podpór)', ref:'ok. 10°'},
+      {m:'ankle', stat:'min', lo:-30, hi:-10, label:'Maks. zgięcie podeszwowe (odbicie)', ref:'ok. 15–20°'},
+      {m:'hip', stat:'max', lo:20, hi:40, label:'Maks. zgięcie biodra', ref:'ok. 30°'},
+      {m:'hip', stat:'min', lo:-25, hi:-3, label:'Maks. wyprost biodra', ref:'ok. 10–15°'}
+    ]}
+};
+
+/* =========================================================
+   STAN
+   ========================================================= */
+const $ = s => document.querySelector(s);
+const video = $('#video'), canvas = $('#view'), ctx = canvas.getContext('2d');
+let PoseLandmarker, fileset, landmarker = null, modelKind = 'heavy', modelLoading = null;
+let src = 'cam', stream = null, view = 'sag', test = TESTS.free, testKey = 'free';
+let cur = null;            // bieżące wartości {L:{},R:{},S:{},vis:{L:{},R:{},S:{}}}
+let pts = null;            // punkty w pikselach
+let calib = {L:{},R:{},S:{}};
+let filters = [], lastVidTime = -1, lastTs = 0, lastUi = 0, running = false;
+let fpsT = performance.now(), fpsN = 0;
+let recording = false, recStart = 0, samples = [], reps = {L:0,R:0}, repState = {L:false,R:false};
+let peaks = {L:null,R:null}, snapshots = [], lastSnapT = {};
+let measurements = [];
+let liveBuf = [];          // ostatnie 10 s do wykresu
+let lastSession = null;    // ostatnia zakończona sesja
+
+/* =========================================================
+   POMOCNICZE
+   ========================================================= */
+const toast = (t, ms=2200) => { const el=$('#toast'); el.textContent=t; el.classList.add('on'); clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('on'),ms); };
+function setStatus(t, cls){ $('#statusTxt').textContent=t; $('#status').className='pill '+(cls||''); }
+const deg = r => r*180/Math.PI;
+const sub = (a,b) => ({x:a.x-b.x, y:a.y-b.y});
+function angBetween(a,b){ const d=a.x*b.x+a.y*b.y, m=Math.hypot(a.x,a.y)*Math.hypot(b.x,b.y); return m? deg(Math.acos(Math.max(-1,Math.min(1,d/m)))) : null; }
+function signedAng(a,b){ return deg(Math.atan2(a.x*b.y-a.y*b.x, a.x*b.x+a.y*b.y)); }
+const fmt = (v, signed) => v==null||isNaN(v) ? '—' : ((signed && v>0 ? '+' : '') + Math.round(v) + '°');
+const fmt1 = v => v==null||isNaN(v) ? '—' : (Math.round(v*10)/10).toFixed(1);
+const esc = s => String(s??'').replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const sidesOf = k => METRICS[k].sides ? ['L','R'] : ['S'];
+const qColor = v => v==null ? 'var(--line)' : v>.8 ? 'var(--ok)' : v>.6 ? 'var(--warn)' : 'var(--bad)';
+document.querySelectorAll('#logoTop').forEach(el => el.append($('#logoTpl').content.cloneNode(true)));
+
+/* ---------- filtr One Euro (wygładzanie punktów) ---------- */
+class OneEuro{
+  constructor(minCut, beta=0.004, dCut=1){ this.minCut=minCut; this.beta=beta; this.dCut=dCut; this.x=null; }
+  static a(dt,c){ const tau=1/(2*Math.PI*c); return 1/(1+tau/dt); }
+  f(x,t){
+    if(this.x==null || t<=this.t || t-this.t>0.5){ this.x=x; this.dx=0; this.t=t; return x; }
+    const dt=t-this.t, ad=OneEuro.a(dt,this.dCut), dx=(x-this.x)/dt;
+    this.dx = ad*dx + (1-ad)*this.dx;
+    const a = OneEuro.a(dt, this.minCut + this.beta*Math.abs(this.dx));
+    this.x = a*x + (1-a)*this.x; this.t=t; return this.x;
+  }
+}
+function resetFilters(){ const mc=+$('#smooth').value; filters = Array.from({length:33},()=>[new OneEuro(mc),new OneEuro(mc)]); }
+resetFilters();
+
+/* =========================================================
+   MODEL
+   ========================================================= */
+async function loadModel(kind){
+  modelKind = kind;
+  setStatus('Ładowanie modelu ' + kind + '…', 'busy');
+  try{
+    if(!fileset){
+      const m = await import(`${CDN}/vision_bundle.mjs`);
+      PoseLandmarker = m.PoseLandmarker;
+      fileset = await m.FilesetResolver.forVisionTasks(`${CDN}/wasm`);
+    }
+    const old = landmarker; landmarker = null; if(old) old.close();
+    const opts = delegate => ({ baseOptions:{modelAssetPath:MODEL_URLS[kind], delegate}, runningMode:'VIDEO', numPoses:1,
+      minPoseDetectionConfidence:.5, minPosePresenceConfidence:.5, minTrackingConfidence:.5 });
+    let dev = 'GPU';
+    try{ landmarker = await PoseLandmarker.createFromOptions(fileset, opts('GPU')); }
+    catch(e){ dev='CPU'; landmarker = await PoseLandmarker.createFromOptions(fileset, opts('CPU')); }
+    setStatus(`MediaPipe Pose ${kind[0].toUpperCase()+kind.slice(1)} · ${dev}`, 'ok');
+  }catch(e){
+    console.error(e);
+    setStatus('Nie udało się załadować modelu – sprawdź internet', 'err');
+    toast('Błąd ładowania modelu. Przy pierwszym uruchomieniu potrzebny jest internet.', 5000);
+  }
+}
+modelLoading = loadModel('heavy');
+$('#modelSel').onchange = e => { modelLoading = loadModel(e.target.value); };
+
+/* =========================================================
+   ŹRÓDŁO OBRAZU
+   ========================================================= */
+document.querySelectorAll('#srcSeg button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('#srcSeg button').forEach(x=>x.classList.toggle('on', x===b));
+  src = b.dataset.v;
+  $('#camSel').style.display = $('#camBtn').style.display = src==='cam' ? '' : 'none';
+  $('#fileBtn').style.display = src==='file' ? '' : 'none';
+  if(src==='file'){ stopCam(); $('#mirror').checked=false; } else { $('#mirror').checked=true; }
+});
+
+async function listCams(){
+  try{
+    const devs = (await navigator.mediaDevices.enumerateDevices()).filter(d=>d.kind==='videoinput');
+    const sel = $('#camSel'), v = sel.value;
+    sel.innerHTML = '<option value="">Domyślna kamera</option>' + devs.map((d,i)=>`<option value="${d.deviceId}">${esc(d.label||'Kamera '+(i+1))}</option>`).join('');
+    sel.value = v;
+  }catch(e){}
+}
+function stopCam(){ if(stream){ stream.getTracks().forEach(t=>t.stop()); stream=null; } $('#camBtn').textContent='Uruchom kamerę'; }
+$('#camBtn').onclick = async () => {
+  if(stream){ stopCam(); video.srcObject=null; running=false; $('#ph').style.display=''; return; }
+  if(!navigator.mediaDevices?.getUserMedia){ toast('Ta przeglądarka nie daje dostępu do kamery. Użyj Chrome lub Edge.',5000); return; }
+  try{
+    const id = $('#camSel').value;
+    stream = await navigator.mediaDevices.getUserMedia({audio:false, video:{
+      ...(id ? {deviceId:{exact:id}} : {}), width:{ideal:1280}, height:{ideal:720}, frameRate:{ideal:60}}});
+    video.removeAttribute('src'); video.srcObject = stream; await video.play();
+    $('#camBtn').textContent='Zatrzymaj kamerę';
+    $('#filebar').classList.remove('on');
+    listCams(); startLoop();
+  }catch(e){ console.error(e); toast('Brak dostępu do kamery: ' + e.message, 5000); }
+};
+$('#camSel').onchange = () => { if(stream){ stopCam(); $('#camBtn').click(); } };
+
+$('#fileIn').onchange = e => {
+  const f = e.target.files[0]; if(!f) return;
+  stopCam(); video.srcObject = null;
+  video.src = URL.createObjectURL(f); video.loop = false;
+  video.onloadedmetadata = () => { $('#filebar').classList.add('on'); video.playbackRate=+$('#rate').value; video.currentTime=0; startLoop(); updateFileBar(); };
+};
+$('#playBtn').onclick = () => video.paused ? video.play() : video.pause();
+video.onplay = () => $('#playBtn').textContent='❚❚';
+video.onpause = () => $('#playBtn').textContent='▶';
+video.onended = () => { $('#playBtn').textContent='▶'; if(recording) toggleRec(); };
+$('#seek').oninput = e => { if(video.duration) video.currentTime = e.target.value/1000*video.duration; };
+$('#rate').onchange = e => video.playbackRate = +e.target.value;
+$('#stepBtn').onclick = () => { video.pause(); video.currentTime = Math.min(video.duration, video.currentTime + 1/30); };
+function updateFileBar(){
+  if(!video.duration) return;
+  $('#seek').value = video.currentTime/video.duration*1000;
+  $('#tlab').textContent = `${video.currentTime.toFixed(1)} / ${video.duration.toFixed(1)} s`;
+}
+
+/* ---------- ustawienia ---------- */
+document.querySelectorAll('#viewSeg button').forEach(b => b.onclick = () => setView(b.dataset.v));
+function setView(v){
+  view = v;
+  document.querySelectorAll('#viewSeg button').forEach(x=>x.classList.toggle('on', x.dataset.v===v));
+  buildAllTable(); buildChartSel();
+}
+$('#smooth').onchange = resetFilters;
+$('#calBtn').onclick = () => {
+  if(!cur){ toast('Najpierw ustaw pacjenta w kadrze.'); return; }
+  const raw = cur.raw;
+  for(const k of CAL_KEYS) for(const s of sidesOf(k)) if(raw[s][k]!=null) calib[s][k] = raw[s][k];
+  $('#calBadge').classList.add('on'); toast('Pozycja neutralna zapisana – kąty kostki, stopy, miednicy i tułowia liczone od 0°.');
+};
+$('#calReset').onclick = () => { calib={L:{},R:{},S:{}}; $('#calBadge').classList.remove('on'); toast('Kalibracja usunięta.'); };
+
+/* =========================================================
+   GŁÓWNA PĘTLA
+   ========================================================= */
+function startLoop(){ $('#ph').style.display='none'; $('#recBtn').disabled=false; $('#snapBtn').disabled=false; resetFilters(); if(!running){ running=true; requestAnimationFrame(loop); } }
+
+function loop(){
+  if(!running) return;
+  requestAnimationFrame(loop);
+  if(video.readyState < 2 || !video.videoWidth) return;
+  const w = video.videoWidth, h = video.videoHeight;
+  if(canvas.width!==w || canvas.height!==h){ canvas.width=w; canvas.height=h; $('#stage').style.aspectRatio = `${w}/${h}`; }
+
+  if(landmarker && video.currentTime !== lastVidTime){
+    lastVidTime = video.currentTime;
+    let ts = performance.now(); if(ts<=lastTs) ts=lastTs+1; lastTs=ts;
+    let res; try{ res = landmarker.detectForVideo(video, ts); }catch(e){ console.warn(e); }
+    const t = video.srcObject ? ts/1000 : video.currentTime;
+    if(res && res.landmarks && res.landmarks[0]) process(res.landmarks[0], w, h, t);
+    else { pts=null; cur=null; }
+    fpsN++;
+  }
+  draw(w,h);
+  const now = performance.now();
+  if(now - fpsT > 1000){ $('#fps').textContent = Math.round(fpsN*1000/(now-fpsT)) + ' fps'; fpsT=now; fpsN=0; }
+  if(now - lastUi > 90){ lastUi = now; updateUI(); if(src==='file') updateFileBar(); }
+}
+
+function process(lm, w, h, t){
+  pts = lm.map((p,i) => ({ x:filters[i][0].f(p.x*w, t), y:filters[i][1].f(p.y*h, t), z:p.z, v:p.visibility ?? 1 }));
+  const raw = computeAngles(pts);
+  const val = {L:{},R:{},S:{}};
+  for(const s of ['L','R','S']) for(const k in raw[s]) val[s][k] = raw[s][k]==null ? null : raw[s][k] - (calib[s][k]||0);
+  cur = {...val, raw, vis:raw.vis, near:raw.near, t};
+
+  const tl = performance.now()/1000;
+  liveBuf.push({t:tl, L:val.L, R:val.R, S:val.S});
+  while(liveBuf.length && tl - liveBuf[0].t > 10) liveBuf.shift();
+
+  if(recording){
+    const tr = video.srcObject ? tl - recStart : t - recStart;
+    samples.push({t:tr, L:{...val.L}, R:{...val.R}, S:{...val.S}});
+    countReps(val); trackPeaks(val);
+  }
+}
+
+/* ---------- obliczanie kątów ---------- */
+function computeAngles(P){
+  const swap = $('#swap').checked;
+  const map = s => IDX[swap ? (s==='L'?'R':'L') : s];
+  const out = {L:{},R:{},S:{},vis:{L:{},R:{},S:{}}};
+  const ok = (...ids) => Math.min(...ids.map(i=>P[i].v));
+  const L = map('L'), R = map('R');
+
+  // kierunek, w którym pacjent jest zwrócony (widok z boku): +1 w prawo obrazu, -1 w lewo
+  let fx = (P[L.toe].x-P[L.heel].x) + (P[R.toe].x-P[R.heel].x);
+  if(Math.abs(fx) < 5) fx = P[0].x - (P[7].x+P[8].x)/2;
+  const f = fx >= 0 ? 1 : -1;
+
+  for(const s of ['L','R']){
+    const I = map(s), sh=P[I.sh], hip=P[I.hip], knee=P[I.knee], ank=P[I.ank], heel=P[I.heel], toe=P[I.toe];
+    const thigh = sub(knee,hip), shank = sub(ank,knee), shankUp = sub(knee,ank), footV = sub(toe,heel), down = sub(hip,sh);
+    const set = (k,v,q) => { out[s][k] = q>=VIS_MIN ? v : null; out.vis[s][k]=q; };
+    // płaszczyzna strzałkowa
+    set('knee',  signedAng(thigh, shank)*f,               ok(I.hip,I.knee,I.ank));
+    set('hip',   -signedAng(down, thigh)*f,               ok(I.sh,I.hip,I.knee));
+    set('ankle', 90 - angBetween(shankUp, footV),         ok(I.knee,I.ank,I.heel,I.toe));
+    set('tibia', signedAng({x:0,y:-1}, shankUp)*f,        ok(I.knee,I.ank));
+    set('foot',  deg(Math.atan2(-footV.y, footV.x*f)),    ok(I.heel,I.toe));
+    // płaszczyzna czołowa – FPPA
+    const midX = (P[L.hip].x + P[R.hip].x)/2;
+    const tt = (knee.y-hip.y)/((ank.y-hip.y)||1), lineX = hip.x + tt*(ank.x-hip.x);
+    const dev = 180 - angBetween(sub(hip,knee), sub(ank,knee));
+    set('fppa', Math.abs(knee.x-midX) < Math.abs(lineX-midX) ? dev : -dev, ok(I.hip,I.knee,I.ank));
+  }
+  const setS = (k,v,q) => { out.S[k] = q>=VIS_MIN ? v : null; out.vis.S[k]=q; };
+  // tułów (z boku) – bliższa strona ciała
+  const near = (P[L.hip].z < P[R.hip].z) ? 'L' : 'R';
+  const N = map(near);
+  setS('trunk', signedAng({x:0,y:-1}, sub(P[N.sh],P[N.hip]))*f, ok(N.sh,N.hip));
+  // miednica i tułów bokiem (z przodu)
+  const lr = sub(P[L.hip], P[R.hip]);
+  setS('pelvis', deg(Math.atan2(lr.y, Math.abs(lr.x))), ok(L.hip,R.hip));
+  const shMid = {x:(P[L.sh].x+P[R.sh].x)/2, y:(P[L.sh].y+P[R.sh].y)/2}, hipMid = {x:(P[L.hip].x+P[R.hip].x)/2, y:(P[L.hip].y+P[R.hip].y)/2};
+  const tv = sub(shMid, hipMid), lat = deg(Math.atan2(Math.abs(tv.x), -tv.y));
+  setS('trunkLat', (tv.x*lr.x >= 0 ? 1 : -1) * lat, ok(L.sh,R.sh,L.hip,R.hip));
+  out.near = near;
+  return out;
+}
+
+/* ---------- powtórzenia i szczyty ---------- */
+function countReps(val){
+  const r = test.rep; if(!r) return;
+  const dir = r.dir || 1;
+  for(const s of ['L','R']){
+    const v = val[s][r.m]; if(v==null) continue;
+    if(!repState[s] && dir*v > dir*r.on) repState[s] = true;
+    else if(repState[s] && dir*v < dir*r.off){ repState[s] = false; reps[s]++; }
+  }
+}
+function trackPeaks(val){
+  const p = test.peak; if(!p) return;
+  const now = performance.now();
+  for(const s of sidesOf(p.m)){
+    const v = val[s]?.[p.m]; if(v==null) continue;
+    const best = peaks[s];
+    if(best==null || p.dir*(v - best) > 1){
+      peaks[s] = v;
+      if(now - (lastSnapT[s]||0) > 250){
+        lastSnapT[s] = now;
+        const img = grab();
+        snapshots = snapshots.filter(x => x.side!==s);
+        snapshots.push({side:s, m:p.m, v, img, vals:{L:{...val.L},R:{...val.R},S:{...val.S}}});
+      }
+    }
+  }
+}
+function grab(maxW=720){
+  const sc = Math.min(1, maxW/canvas.width), c = document.createElement('canvas');
+  c.width = canvas.width*sc; c.height = canvas.height*sc;
+  c.getContext('2d').drawImage(canvas,0,0,c.width,c.height);
+  return c.toDataURL('image/jpeg', .8);
+}
+
+/* =========================================================
+   RYSOWANIE NAKŁADKI
+   ========================================================= */
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+function draw(w,h){
+  const mirror = $('#mirror').checked;
+  ctx.save(); if(mirror){ ctx.translate(w,0); ctx.scale(-1,1); } ctx.drawImage(video,0,0,w,h); ctx.restore();
+  if(!pts || !cur) return;
+  const X = p => ({x: mirror ? w-p.x : p.x, y:p.y, v:p.v});
+  const sc = h/720, lw = 4*sc, fs = Math.round(17*sc);
+  const swap = $('#swap').checked;
+  const map = s => IDX[swap ? (s==='L'?'R':'L') : s];
+  const col = {L:css('--left'), R:css('--right')};
+
+  const line = (a,b,c,wid=lw,dash) => { if(a.v<VIS_MIN||b.v<VIS_MIN) return; ctx.strokeStyle=c; ctx.lineWidth=wid; ctx.setLineDash(dash||[]); ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke(); ctx.setLineDash([]); };
+  const dot = (p,c) => { if(p.v<VIS_MIN) return; ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(p.x,p.y,lw*1.6,0,7); ctx.fill(); ctx.fillStyle=c; ctx.beginPath(); ctx.arc(p.x,p.y,lw*1.05,0,7); ctx.fill(); };
+  const label = (p, txt, c, dx=14, dy=-14) => {
+    if(p.v<VIS_MIN) return;
+    ctx.font = `700 ${fs}px ${css('--font')}`; const tw = ctx.measureText(txt).width, pad=6*sc;
+    const x = p.x + dx*sc, y = p.y + dy*sc;
+    ctx.fillStyle='rgba(10,14,20,.82)'; ctx.beginPath(); ctx.roundRect(x, y-fs, tw+pad*2, fs+pad*1.4, 6*sc); ctx.fill();
+    ctx.fillStyle=c; ctx.fillRect(x, y-fs, 3*sc, fs+pad*1.4);
+    ctx.fillStyle='#fff'; ctx.fillText(txt, x+pad, y+pad*.1);
+  };
+  const arc = (c, a, b, color, r=34) => {
+    if(c.v<VIS_MIN||a.v<VIS_MIN||b.v<VIS_MIN) return;
+    const a1 = Math.atan2(a.y-c.y, a.x-c.x), a2 = Math.atan2(b.y-c.y, b.x-c.x);
+    let d = a2-a1; while(d>Math.PI) d-=2*Math.PI; while(d<-Math.PI) d+=2*Math.PI;
+    ctx.fillStyle = color+'40'; ctx.strokeStyle = color; ctx.lineWidth = 2*sc;
+    ctx.beginPath(); ctx.moveTo(c.x,c.y); ctx.arc(c.x,c.y,r*sc,a1,a1+d,d<0); ctx.closePath(); ctx.fill(); ctx.stroke();
+  };
+
+  const L = map('L'), R = map('R');
+  // tułów i miednica
+  const shL=X(pts[L.sh]), shR=X(pts[R.sh]), hL=X(pts[L.hip]), hR=X(pts[R.hip]);
+  line(shL,shR,'rgba(255,255,255,.6)',lw*.7); line(hL,hR,'rgba(255,255,255,.8)',lw*.8);
+  line(shL,hL,'rgba(255,255,255,.6)',lw*.7); line(shR,hR,'rgba(255,255,255,.6)',lw*.7);
+
+  const sides = view==='sag' ? [cur.near==='L'?'R':'L', cur.near] : ['L','R']; // bliższą nogę rysuj na wierzchu
+  for(const s of sides){
+    const I = map(s), c = col[s];
+    const sh=X(pts[I.sh]), hip=X(pts[I.hip]), knee=X(pts[I.knee]), ank=X(pts[I.ank]), heel=X(pts[I.heel]), toe=X(pts[I.toe]);
+    const far = view==='sag' && s!==cur.near;
+    ctx.globalAlpha = far ? .45 : 1;
+    line(hip,knee,c); line(knee,ank,c); line(ank,heel,c); line(heel,toe,c); line(ank,toe,c,lw*.6);
+    if(view==='sag'){
+      if(!far){
+        // przedłużenia ramion kątów
+        const ext = (a,b,k=.45) => ({x:b.x+(b.x-a.x)*k, y:b.y+(b.y-a.y)*k, v:Math.min(a.v,b.v)});
+        line(knee, ext(hip,knee,.35), 'rgba(255,255,255,.5)', 1.5*sc, [6*sc,5*sc]);
+        arc(knee, hip, ank, c); arc(hip, sh, knee, c, 30); arc(ank, knee, toe, c, 28);
+        label(knee, `Kolano ${fmt(cur[s].knee)}`, c);
+        label(hip, `Biodro ${fmt(cur[s].hip)}`, c, 14, -24);
+        label(ank, `Kostka ${fmt(cur[s].ankle,true)}`, c, 14, 34);
+        if(testKey==='lunge'){
+          line(ank, {x:ank.x, y:knee.y, v:ank.v}, 'rgba(255,255,255,.55)', 1.5*sc, [6*sc,5*sc]);
+          label(knee, `Goleń ${fmt(cur[s].tibia,true)}`, c, 14, 16);
+        }
+      }
+    } else {
+      line(hip, ank, 'rgba(255,255,255,.55)', 1.5*sc, [6*sc,5*sc]);
+      arc(knee, hip, ank, c, 30);
+      label(knee, `FPPA ${fmt(cur[s].fppa,true)}`, c, s==='L'?14:-150, -14);
+    }
+    [hip,knee,ank,heel,toe].forEach(p=>dot(p,c));
+    ctx.globalAlpha = 1;
+  }
+  if(view==='front'){
+    const mid = {x:(hL.x+hR.x)/2, y:(hL.y+hR.y)/2, v:1};
+    line({x:mid.x-120*sc,y:mid.y,v:1},{x:mid.x+120*sc,y:mid.y,v:1},'rgba(255,255,255,.35)',1.5*sc,[5*sc,5*sc]);
+    label(mid, `Miednica ${fmt(cur.S.pelvis,true)}`, css('--accent'), -70, -26);
+  } else if(cur.S.trunk!=null){
+    const N = map(cur.near);
+    label(X(pts[N.sh]), `Tułów ${fmt(cur.S.trunk,true)}`, css('--accent'), 14, -10);
+  }
+}
+
+/* =========================================================
+   INTERFEJS: test, karty, tabela
+   ========================================================= */
+const testSel = $('#testSel');
+testSel.innerHTML = Object.entries(TESTS).map(([k,t])=>`<option value="${k}">${t.name}</option>`).join('');
+testSel.onchange = () => setTest(testSel.value);
+function setTest(k){
+  testKey = k; test = TESTS[k]; testSel.value = k;
+  $('#testDesc').innerHTML = test.desc;
+  setView(test.view);
+  $('#hero').innerHTML = test.primary.map(m => {
+    const M = METRICS[m];
+    const cells = sidesOf(m).map(s => `<div class="hv ${s}"><small><span>${s==='L'?'Lewa':s==='R'?'Prawa':'Wartość'}</span><span class="mono" id="mm-${m}-${s}"></span></small>
+      <div class="big mono" id="hv-${m}-${s}">—</div><div class="bar" id="hb-${m}-${s}"><i></i><b></b></div></div>`).join('');
+    return `<div class="hcard"><div class="hn">${M.name}<span>${M.hint}</span></div><div class="hvals">${cells}</div></div>`;
+  }).join('') + (test.rep ? `<div class="reps">Powtórzenia (liczone podczas nagrywania): <span class="cL">L</span> <b id="repL">0</b> &nbsp; <span class="cR">P</span> <b id="repR">0</b></div>` : '');
+  // pasek normy na kartach
+  for(const m of test.primary){
+    const M = METRICS[m], n = test.norms.find(x=>x.m===m && !x.asym);
+    for(const s of sidesOf(m)){
+      const bar = document.getElementById(`hb-${m}-${s}`); if(!bar) continue;
+      const i = bar.querySelector('i');
+      if(n){ const lo = n.lo ?? M.range[0], hi = n.hi ?? M.range[1];
+        i.style.left = pct(lo,M)+'%'; i.style.width = (pct(hi,M)-pct(lo,M))+'%'; }
+      else i.style.display='none';
+    }
+  }
+  $('#chartSel').value = test.primary[0];
+}
+const pct = (v,M) => Math.max(0,Math.min(100,(v-M.range[0])/(M.range[1]-M.range[0])*100));
+
+function buildAllTable(){
+  const keys = Object.keys(METRICS).filter(k=>METRICS[k].view===view);
+  $('#allTbl').innerHTML = `<tr><th>Kąt</th><th class="cL">Lewa</th><th class="cR">Prawa</th><th>min / maks (L · P)</th></tr>` +
+    keys.map(k => {
+      const M = METRICS[k];
+      if(!M.sides) return `<tr><td>${M.name}<br><small>${M.hint}</small></td><td colspan="2" class="mono" id="tv-${k}-S">—</td><td class="mono" id="tr-${k}">—</td></tr>`;
+      return `<tr><td>${M.name}<br><small>${M.hint}</small></td><td class="mono" id="tv-${k}-L">—</td><td class="mono" id="tv-${k}-R">—</td><td class="mono" id="tr-${k}">—</td></tr>`;
+    }).join('');
+}
+function buildChartSel(){
+  const keys = Object.keys(METRICS).filter(k=>METRICS[k].view===view);
+  const sel = $('#chartSel'), v = sel.value;
+  sel.innerHTML = keys.map(k=>`<option value="${k}">${METRICS[k].name}</option>`).join('');
+  sel.value = keys.includes(v) ? v : keys[0];
+}
+$('#chartSel').onchange = () => drawChart();
+
+let liveStats = null, statsAt = 0;
+function updateUI(){
+  if(recording){
+    $('#recBadge').textContent = `● REC ${(samples.length? samples[samples.length-1].t : 0).toFixed(1)} s`;
+    if(performance.now()-statsAt > 500){ liveStats = computeStats(samples); statsAt = performance.now(); }
+  }
+  const st = recording ? liveStats : (lastSession?.stats || null);
+  for(const k in METRICS){
+    for(const s of sidesOf(k)){
+      const v = cur ? cur[s][k] : null, q = cur ? cur.vis[s][k] : null;
+      const tv = document.getElementById(`tv-${k}-${s}`);
+      if(tv) tv.innerHTML = `<span class="q" style="background:${qColor(q)}"></span>${fmt(v, METRICS[k].signed)}`;
+      const hv = document.getElementById(`hv-${k}-${s}`);
+      if(hv){
+        hv.textContent = fmt(v, METRICS[k].signed);
+        hv.style.opacity = (view==='sag' && cur && METRICS[k].sides && s!==cur.near) ? .5 : 1;
+        const b = document.querySelector(`#hb-${k}-${s} b`); if(b) b.style.left = v==null ? '-10px' : `calc(${pct(v,METRICS[k])}% - 1px)`;
+        const mm = document.getElementById(`mm-${k}-${s}`);
+        if(mm) mm.textContent = st?.[k]?.[s] ? `${fmt(st[k][s].min,true)} … ${fmt(st[k][s].max,true)}` : (view==='sag' && cur && METRICS[k].sides && s===cur.near ? 'bliżej kamery' : '');
+      }
+    }
+    const tr = document.getElementById(`tr-${k}`);
+    if(tr) tr.textContent = st?.[k] ? sidesOf(k).map(s=>st[k][s] ? `${fmt(st[k][s].min,true)}/${fmt(st[k][s].max,true)}` : '—').join(' · ') : '—';
+  }
+  if(test.rep){ $('#repL').textContent = reps.L; $('#repR').textContent = reps.R; }
+  if(document.querySelector('#tab-chart.on')) drawChart();
+}
+
+/* =========================================================
+   NAGRYWANIE SESJI
+   ========================================================= */
+$('#recBtn').onclick = () => toggleRec();
+function toggleRec(){
+  recording = !recording;
+  $('#recBtn').classList.toggle('on', recording);
+  $('#recBadge').classList.toggle('on', recording);
+  $('#recBtn').innerHTML = recording ? '■ Zatrzymaj nagrywanie <small>(R)</small>' : '● Nagrywaj sesję <small class="muted">(R)</small>';
+  if(recording){
+    samples=[]; reps={L:0,R:0}; repState={L:false,R:false}; peaks={L:null,R:null,S:null}; snapshots=[]; lastSnapT={}; liveStats=null;
+    recStart = video.srcObject ? performance.now()/1000 : video.currentTime;
+    if(src==='file' && video.paused) video.play();
+    toast('Nagrywanie rozpoczęte');
+  } else {
+    if(samples.length < 5){ toast('Za mało danych – pacjent nie był widoczny.'); return; }
+    lastSession = makeSession();
+    $('#chartInfo').textContent = `Nagrana sesja – ${lastSession.duration.toFixed(1)} s`;
+    drawChart(); toast('Sesja zakończona – możesz wygenerować raport.');
+  }
+}
+function median5(a){ return a.map((_,i)=>{ const w=a.slice(Math.max(0,i-2),i+3).filter(v=>v!=null).sort((x,y)=>x-y); return w.length ? w[w.length>>1] : null; }); }
+function computeStats(S){
+  const out = {};
+  for(const k in METRICS){
+    for(const s of sidesOf(k)){
+      const vals = median5(S.map(x=>x[s]?.[k] ?? null)).filter(v=>v!=null);
+      if(vals.length < 3) continue;
+      let min=Infinity,max=-Infinity,sum=0; for(const v of vals){ if(v<min)min=v; if(v>max)max=v; sum+=v; }
+      (out[k] ||= {})[s] = {min, max, rom:max-min, mean:sum/vals.length, n:vals.length, absmax:Math.max(Math.abs(min),Math.abs(max))};
+    }
+  }
+  return out;
+}
+function patient(){ return {name:$('#pName').value.trim(), birth:$('#pBirth').value, side:$('#pSide').value, diag:$('#pDiag').value.trim(), stage:$('#pStage').value.trim(), ther:$('#pTher').value.trim()}; }
+function makeSession(){
+  return { id: Date.now(), date: new Date().toISOString(), testKey, view, model: modelKind,
+    calibrated: Object.values(calib).some(o=>Object.keys(o).length), duration: samples.at(-1).t, frames: samples.length,
+    stats: computeStats(samples), reps: test.rep ? {...reps} : null, samples: samples.slice(), snapshots: snapshots.slice() };
+}
+
+/* ---------- zapis pomiaru ---------- */
+$('#snapBtn').onclick = () => saveMeasurement();
+function saveMeasurement(){
+  if(!cur){ toast('Brak wykrytej sylwetki.'); return; }
+  const m = { id:Date.now(), label:`Pomiar ${measurements.length+1}`, view, img:grab(), L:{...cur.L}, R:{...cur.R}, S:{...cur.S} };
+  measurements.push(m); renderMeas(); toast(`Zapisano: ${m.label}`);
+}
+function renderMeas(){
+  const keys = k => Object.keys(METRICS).filter(x=>METRICS[x].view===k);
+  $('#measList').innerHTML = measurements.length ? measurements.map((m,i)=>`<div class="mi"><img src="${m.img}" alt="">
+    <div><input type="text" value="${esc(m.label)}" data-i="${i}">
+    ${keys(m.view).map(k=>`${METRICS[k].short}: ${METRICS[k].sides ? `<span class="cL">${fmt(m.L[k],METRICS[k].signed)}</span> / <span class="cR">${fmt(m.R[k],METRICS[k].signed)}</span>` : fmt(m.S[k],true)}`).join('<br>')}
+    <div style="margin-top:6px"><button class="btn small" data-del="${i}">Usuń</button></div></div></div>`).join('')
+    : '<p class="muted">Brak zapisanych pomiarów.</p>';
+}
+$('#measList').addEventListener('input', e => { if(e.target.dataset.i) measurements[+e.target.dataset.i].label = e.target.value; });
+$('#measList').addEventListener('click', e => { if(e.target.dataset.del){ measurements.splice(+e.target.dataset.del,1); renderMeas(); } });
+renderMeas();
+
+document.addEventListener('keydown', e => {
+  if(['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName)) return;
+  if(e.code==='Space' && !$('#snapBtn').disabled){ e.preventDefault(); saveMeasurement(); }
+  if(e.key.toLowerCase()==='r' && !$('#recBtn').disabled){ e.preventDefault(); toggleRec(); }
+});
+
+/* =========================================================
+   WYKRES
+   ========================================================= */
+function drawChart(target, opts={}){
+  const c = target || $('#chart'), k = opts.metric || $('#chartSel').value, M = METRICS[k];
+  if(!M) return;
+  const dpr = opts.dpr || window.devicePixelRatio || 1;
+  const W = opts.w || c.clientWidth, H = opts.h || c.clientHeight;
+  if(!W || !H) return;
+  c.width = W*dpr; c.height = H*dpr;
+  const g = c.getContext('2d'); g.setTransform(dpr,0,0,dpr,0,0);
+  const light = !!opts.light;
+  const C = { bg: light?'#fff':css('--panel'), grid: light?'#e3e7ec':css('--line'), txt: light?'#5b6676':css('--muted'),
+              L: light?'#0284c7':css('--left'), R: light?'#db2777':css('--right'), S: css('--accent') };
+  g.fillStyle = C.bg; g.fillRect(0,0,W,H);
+
+  let data, t0 = 0;
+  const sess = opts.session || (!recording && lastSession && !opts.live ? lastSession : null);
+  if(recording) data = samples;
+  else if(sess) data = sess.samples;
+  else { data = liveBuf; t0 = liveBuf.length ? liveBuf[0].t : 0; }
+  const sides = sidesOf(k);
+  let tmin = Infinity, tmax = -Infinity, vmin = Infinity, vmax = -Infinity;
+  for(const d of data) for(const s of sides){ const v = d[s]?.[k]; if(v==null) continue; vmin=Math.min(vmin,v); vmax=Math.max(vmax,v); tmin=Math.min(tmin,d.t-t0); tmax=Math.max(tmax,d.t-t0); }
+  const n = (sess ? TESTS[sess.testKey] : test).norms.find(x=>x.m===k && !x.asym);
+  if(n){ if(n.lo!=null){vmin=Math.min(vmin,n.lo);vmax=Math.max(vmax,n.lo);} if(n.hi!=null){vmin=Math.min(vmin,n.hi);vmax=Math.max(vmax,n.hi);} }
+  if(!isFinite(vmin)){ vmin=M.range[0]; vmax=M.range[1]; tmin=0; tmax=10; }
+  if(!recording && !sess){ tmin = 0; tmax = 10; }
+  const padV = Math.max(5,(vmax-vmin)*.12); vmin=Math.floor((vmin-padV)/10)*10; vmax=Math.ceil((vmax+padV)/10)*10;
+  if(tmax-tmin < 1) tmax = tmin+1;
+  const ml=44, mr=12, mt=12, mb=26, pw=W-ml-mr, ph=H-mt-mb;
+  const xs = t => ml + (t-tmin)/(tmax-tmin)*pw, ys = v => mt + (1-(v-vmin)/(vmax-vmin))*ph;
+
+  // pas normy
+  if(n){ const lo = n.lo ?? vmin, hi = n.hi ?? vmax; g.fillStyle='rgba(34,197,94,.13)'; g.fillRect(ml, ys(hi), pw, ys(lo)-ys(hi)); }
+  // siatka
+  g.font = '11px ' + css('--font'); g.fillStyle=C.txt; g.strokeStyle=C.grid; g.lineWidth=1;
+  const vstep = (vmax-vmin) > 120 ? 30 : (vmax-vmin) > 60 ? 20 : 10;
+  g.textAlign='right'; g.textBaseline='middle';
+  for(let v=Math.ceil(vmin/vstep)*vstep; v<=vmax; v+=vstep){ g.beginPath(); g.moveTo(ml,ys(v)); g.lineTo(W-mr,ys(v)); g.stroke(); g.fillText(v+'°', ml-6, ys(v)); }
+  if(vmin<0 && vmax>0){ g.strokeStyle=C.txt; g.beginPath(); g.moveTo(ml,ys(0)); g.lineTo(W-mr,ys(0)); g.stroke(); }
+  g.textAlign='center'; g.textBaseline='top';
+  const span = tmax-tmin, ts = span>60?10:span>20?5:span>8?2:1;
+  for(let t=Math.ceil(tmin/ts)*ts; t<=tmax; t+=ts) g.fillText(t+' s', xs(t), H-mb+6);
+  // linie
+  for(const s of sides){
+    g.strokeStyle = C[s]; g.lineWidth = 2; g.lineJoin='round'; g.beginPath(); let pen=false;
+    for(const d of data){ const v=d[s]?.[k]; if(v==null){ pen=false; continue; } const x=xs(d.t-t0), y=ys(v); pen ? g.lineTo(x,y) : g.moveTo(x,y); pen=true; }
+    g.stroke();
+  }
+  return c;
+}
+window.addEventListener('resize', () => drawChart());
+
+/* =========================================================
+   ZAKŁADKI
+   ========================================================= */
+document.querySelectorAll('#tabs button').forEach(b => b.onclick = () => openTab(b.dataset.t));
+function openTab(t){
+  document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on', x.dataset.t===t));
+  document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on', x.id==='tab-'+t));
+  if(t==='chart') drawChart();
+  if(t==='patient') renderHist();
+}
+$('#toReport').onclick = () => { if(recording) toggleRec(); buildReport(); openTab('report'); $('#tabsArea').scrollIntoView({behavior:'smooth'}); };
+
+/* =========================================================
+   PACJENT I HISTORIA
+   ========================================================= */
+const pFields = ['pName','pBirth','pSide','pDiag','pStage','pTher','pNotes'];
+try{ const p = JSON.parse(localStorage.getItem(PATIENT_KEY)||'{}'); pFields.forEach(f=>{ if(p[f]!=null) $('#'+f).value=p[f]; }); }catch(e){}
+pFields.forEach(f => $('#'+f).addEventListener('input', () => {
+  try{ localStorage.setItem(PATIENT_KEY, JSON.stringify(Object.fromEntries(pFields.map(x=>[x,$('#'+x).value])))); }catch(e){}
+}));
+function loadHist(){ try{ return JSON.parse(localStorage.getItem(HIST_KEY)||'[]'); }catch(e){ return []; } }
+function saveHistArr(a){ try{ localStorage.setItem(HIST_KEY, JSON.stringify(a)); return true; }catch(e){ toast('Brak miejsca w pamięci przeglądarki – wyeksportuj i usuń starsze sesje.',5000); return false; } }
+function histEntry(sess){
+  return { id:sess.id, date:sess.date, testKey:sess.testKey, view:sess.view, model:sess.model, duration:sess.duration, frames:sess.frames,
+    stats:sess.stats, reps:sess.reps, patient:patient(), notes:$('#pNotes').value,
+    measurements: measurements.map(m=>({label:m.label, view:m.view, L:m.L, R:m.R, S:m.S})) };
+}
+$('#saveHist').onclick = () => {
+  const sess = lastSession || (measurements.length ? emptySession() : null);
+  if(!sess){ toast('Najpierw nagraj sesję albo zapisz pomiar.'); return; }
+  if(!patient().name){ toast('Uzupełnij imię i nazwisko pacjenta w zakładce „Pacjent”.'); openTab('patient'); return; }
+  const a = loadHist().filter(x=>x.id!==sess.id); a.push(histEntry(sess));
+  if(saveHistArr(a)){ toast('Sesja zapisana w historii.'); buildReport(); }
+};
+function emptySession(){ return { id: measurements[0].id, date:new Date().toISOString(), testKey, view, model:modelKind, duration:0, frames:0, stats:{}, reps:null, samples:[], snapshots:[] }; }
+function renderHist(){
+  const a = loadHist().sort((x,y)=>y.date.localeCompare(x.date));
+  $('#histTbl').innerHTML = a.length ? `<tr><th>Data</th><th>Pacjent</th><th>Test</th><th>Kluczowy wynik</th><th></th></tr>` + a.map(h => {
+    const T = TESTS[h.testKey], n = T?.norms.find(x=>x.m && x.m[0]!=='_' && !x.asym);
+    const key = n && h.stats[n.m] ? sidesOf(n.m).map(s=>h.stats[n.m][s] ? `${s==='S'?'':s==='L'?'L ':'P '}${fmt(h.stats[n.m][s][n.stat],true)}` : '').join(' · ') : '—';
+    return `<tr><td>${new Date(h.date).toLocaleString('pl-PL')}</td><td>${esc(h.patient?.name)}</td><td>${T?.name||h.testKey}</td><td>${n?METRICS[n.m].short+': ':''}${key}</td>
+      <td style="text-align:right"><button class="btn small" data-rep="${h.id}">Raport</button> <button class="btn small" data-hdel="${h.id}">Usuń</button></td></tr>`;
+  }).join('') : '<tr><td class="muted">Brak zapisanych sesji.</td></tr>';
+}
+$('#histTbl').addEventListener('click', e => {
+  const id = +(e.target.dataset.rep || e.target.dataset.hdel); if(!id) return;
+  if(e.target.dataset.hdel){ if(confirm('Usunąć tę sesję z historii?')){ saveHistArr(loadHist().filter(x=>x.id!==id)); renderHist(); } return; }
+  const h = loadHist().find(x=>x.id===id); if(h){ buildReport(h, true); openTab('report'); }
+});
+$('#histExport').onclick = () => download(`bikerc-rehab-historia-${new Date().toISOString().slice(0,10)}.json`, JSON.stringify(loadHist(),null,1), 'application/json');
+$('#histImport').onchange = async e => {
+  const f = e.target.files[0]; if(!f) return;
+  try{ const inc = JSON.parse(await f.text()); const a = loadHist(); const ids = new Set(a.map(x=>x.id));
+    inc.forEach(x=>{ if(x && x.id && !ids.has(x.id)) a.push(x); }); saveHistArr(a); renderHist(); toast(`Zaimportowano ${inc.length} sesji.`);
+  }catch(err){ toast('Nieprawidłowy plik.'); }
+  e.target.value='';
+};
+
+/* =========================================================
+   RAPORT
+   ========================================================= */
+function judge(n, v){
+  if(v==null) return null;
+  const okv = (n.lo==null || v>=n.lo) && (n.hi==null || v<=n.hi);
+  if(okv) return 'ok';
+  if(n.warn!=null) return v<=n.warn ? 'warn' : 'bad';
+  const d = n.lo!=null && v<n.lo ? n.lo-v : v-n.hi;
+  return d <= 5 ? 'warn' : 'bad';
+}
+const TAG = {ok:'<span class="tag t-ok">w normie</span>', warn:'<span class="tag t-warn">granica</span>', bad:'<span class="tag t-bad">poza normą</span>'};
+function asym(a,b){ if(a==null||b==null) return null; const m=Math.max(Math.abs(a),Math.abs(b)); return m<1?0:Math.abs(a-b)/m*100; }
+
+function buildReport(h, fromHist){
+  const sess = fromHist ? h : (lastSession || (measurements.length ? emptySession() : null));
+  if(!sess){ $('#report').innerHTML = '<p style="color:#7a8594">Nagraj sesję (przycisk „Nagrywaj”) albo zapisz pomiary, a potem kliknij „Odśwież raport”.</p>'; return; }
+  const T = TESTS[sess.testKey], P = fromHist ? (h.patient||{}) : patient(), notes = fromHist ? h.notes : $('#pNotes').value;
+  const meas = fromHist ? (h.measurements||[]) : measurements;
+  const st = sess.stats || {};
+  const sideName = {L:'lewa', R:'prawa', B:'obie', '':'—'};
+  const age = P.birth ? Math.floor((new Date(sess.date) - new Date(P.birth))/31557600000) : null;
+
+  // poprzednia sesja tego pacjenta z tym samym testem
+  const prev = loadHist().filter(x => x.patient?.name && x.patient.name===P.name && x.testKey===sess.testKey && x.date < sess.date && x.id!==sess.id)
+                         .sort((a,b)=>b.date.localeCompare(a.date))[0];
+
+  // tabela wyników vs norma
+  let normRows = '';
+  for(const n of T.norms){
+    if(n.m==='_reps'){
+      if(!sess.reps) continue;
+      normRows += `<tr><td>${n.label}</td><td class="cL">${sess.reps.L}</td><td class="cR">${sess.reps.R}</td><td>${fmt1(asym(sess.reps.L,sess.reps.R))}%</td><td style="text-align:left">${n.ref}</td><td>${TAG[judge(n,sess.reps.L)]||''}</td><td>${TAG[judge(n,sess.reps.R)]||''}</td></tr>`;
+      continue;
+    }
+    const M = METRICS[n.m], s0 = st[n.m]; if(!s0) continue;
+    if(n.asym){
+      const a = s0.L?.[n.stat], b = s0.R?.[n.stat]; if(a==null||b==null) continue;
+      const d = Math.abs(a-b), j = d<=5?'ok':d<=8?'warn':'bad';
+      normRows += `<tr><td>${n.label}</td><td colspan="2" style="text-align:center">${Math.round(d)}°</td><td></td><td style="text-align:left">${n.ref}</td><td colspan="2" style="text-align:center">${TAG[j]}</td></tr>`;
+      continue;
+    }
+    if(M.sides){
+      const a = s0.L?.[n.stat], b = s0.R?.[n.stat], as = asym(a,b);
+      normRows += `<tr><td>${n.label}</td><td class="cL">${fmt(a,M.signed)}</td><td class="cR">${fmt(b,M.signed)}</td><td>${as==null?'—':`${Math.round(as)}%${as>15?' ⚠':''}`}</td>
+        <td style="text-align:left">${n.ref}</td><td>${TAG[judge(n,a)]||'—'}</td><td>${TAG[judge(n,b)]||'—'}</td></tr>`;
+    } else {
+      const a = s0.S?.[n.stat];
+      normRows += `<tr><td>${n.label}</td><td colspan="2" style="text-align:center">${fmt(a,true)}</td><td></td><td style="text-align:left">${n.ref}</td><td colspan="2" style="text-align:center">${TAG[judge(n,a)]||'—'}</td></tr>`;
+    }
+  }
+
+  // pełne statystyki
+  const keys = Object.keys(METRICS).filter(k=>METRICS[k].view===sess.view && st[k]);
+  const fullRows = keys.map(k => {
+    const M = METRICS[k], c = s => st[k][s] ? `${fmt(st[k][s].min,true)} / ${fmt(st[k][s].max,true)} / <b>${Math.round(st[k][s].rom)}°</b>` : '—';
+    return M.sides ? `<tr><td>${M.name}</td><td class="cL">${c('L')}</td><td class="cR">${c('R')}</td><td>${st[k].L&&st[k].R?Math.round(asym(st[k].L.rom,st[k].R.rom))+'%':'—'}</td></tr>`
+                   : `<tr><td>${M.name}</td><td colspan="2" style="text-align:center">${c('S')}</td><td></td></tr>`;
+  }).join('');
+
+  // porównanie z poprzednią sesją
+  let cmp = '';
+  if(prev){
+    const rows = T.norms.filter(n=>n.m && n.m[0]!=='_' && !n.asym && st[n.m] && prev.stats?.[n.m]).map(n => {
+      const M = METRICS[n.m];
+      const cell = s => { const a = st[n.m][s]?.[n.stat], b = prev.stats[n.m][s]?.[n.stat]; if(a==null||b==null) return '<td>—</td>';
+        const d = a-b; return `<td>${fmt(b,M.signed)} → <b>${fmt(a,M.signed)}</b> <small>(${d>=0?'+':''}${Math.round(d)}°)</small></td>`; };
+      return `<tr><td>${n.label}</td>${M.sides ? cell('L')+cell('R') : `<td colspan="2" style="text-align:center">${cell('S').slice(4,-5)}</td>`}</tr>`;
+    }).join('');
+    if(rows) cmp = `<h3>Porównanie z poprzednią sesją (${new Date(prev.date).toLocaleDateString('pl-PL')})</h3>
+      <table><tr><th>Parametr</th><th class="cL">Lewa: wtedy → teraz</th><th class="cR">Prawa: wtedy → teraz</th></tr>${rows}</table>`;
+  }
+
+  // wykres
+  let chartImg = '';
+  if(!fromHist && sess.samples?.length){
+    const c = document.createElement('canvas');
+    const metrics = T.primary.filter(m=>METRICS[m].view===sess.view).slice(0,2);
+    chartImg = metrics.map(m => { drawChart(c, {metric:m, session:sess, w:900, h:240, dpr:2, light:true});
+      return `<p style="margin:10px 0 4px;font-weight:600">${METRICS[m].name} w czasie <span style="font-weight:400;color:#7a8594">(<span class="cL">— lewa</span>, <span class="cR">— prawa</span>, zielone tło = norma)</span></p><img class="chartimg" src="${c.toDataURL('image/png')}">`; }).join('');
+  }
+
+  // zdjęcia
+  const imgs = [];
+  if(!fromHist) for(const s of sess.snapshots||[]) imgs.push(`<figure><img src="${s.img}"><figcaption>Szczyt – ${METRICS[s.m].name}, ${s.side==='L'?'lewa':s.side==='R'?'prawa':''}: <b>${fmt(s.v,true)}</b></figcaption></figure>`);
+  if(!fromHist) for(const m of meas) imgs.push(`<figure><img src="${m.img}"><figcaption><b>${esc(m.label)}</b><br>${Object.keys(METRICS).filter(k=>METRICS[k].view===m.view).map(k=>`${METRICS[k].short} ${METRICS[k].sides?`L ${fmt(m.L[k],METRICS[k].signed)} / P ${fmt(m.R[k],METRICS[k].signed)}`:fmt(m.S[k],true)}`).join(' · ')}</figcaption></figure>`);
+  let measTbl = '';
+  if(meas.length){
+    const mk = Object.keys(METRICS).filter(k=>METRICS[k].view===(meas[0].view||sess.view));
+    measTbl = `<table><tr><th>Pomiar</th>${mk.map(k=>`<th>${METRICS[k].short}${METRICS[k].sides?' L / P':''}</th>`).join('')}</tr>${meas.map(m=>`<tr><td>${esc(m.label)}</td>${mk.map(k=>`<td>${METRICS[k].sides?`<span class="cL">${fmt(m.L[k],METRICS[k].signed)}</span> / <span class="cR">${fmt(m.R[k],METRICS[k].signed)}</span>`:fmt(m.S[k],true)}</td>`).join('')}</tr>`).join('')}</table>`;
+  }
+
+  const logo = $('#logoTpl').innerHTML;
+  $('#report').innerHTML = `
+    <div class="rh">${logo}<div style="text-align:right"><h1>Raport analizy ruchu kończyny dolnej</h1>
+      <div style="color:#5b6676">${T.name} · ${new Date(sess.date).toLocaleString('pl-PL')}</div></div></div>
+    <h3>Pacjent</h3>
+    <div class="kv">
+      <div><span>Imię i nazwisko</span>${esc(P.name)||'—'}</div>
+      <div><span>Wiek</span>${age!=null?age+' lat':'—'}</div>
+      <div><span>Strona leczona</span>${sideName[P.side||'']}</div>
+      <div><span>Rozpoznanie</span>${esc(P.diag)||'—'}</div>
+      <div><span>Etap rehabilitacji</span>${esc(P.stage)||'—'}</div>
+      <div><span>Terapeuta</span>${esc(P.ther)||'—'}</div>
+    </div>
+    <h3>Badanie</h3>
+    <div class="kv">
+      <div><span>Test</span>${T.name}</div>
+      <div><span>Płaszczyzna</span>${sess.view==='sag'?'strzałkowa (widok z boku)':'czołowa (widok z przodu)'}</div>
+      <div><span>Czas nagrania</span>${sess.duration?sess.duration.toFixed(1)+' s · '+sess.frames+' klatek':'pomiary punktowe'}</div>
+      <div><span>Model</span>MediaPipe Pose ${sess.model}</div>
+      <div><span>Kalibracja 0°</span>${sess.calibrated?'tak':'nie'}</div>
+      ${sess.reps?`<div><span>Powtórzenia / cykle</span>L ${sess.reps.L} · P ${sess.reps.R}</div>`:''}
+    </div>
+    ${normRows?`<h3>Wyniki w odniesieniu do normy</h3><table><tr><th>Parametr</th><th class="cL">Lewa</th><th class="cR">Prawa</th><th>Asymetria</th><th style="text-align:left">Odniesienie</th><th>Ocena L</th><th>Ocena P</th></tr>${normRows}</table>`:''}
+    ${fullRows?`<h3>Zakresy ruchu w sesji</h3><table><tr><th>Kąt (min / maks / zakres)</th><th class="cL">Lewa</th><th class="cR">Prawa</th><th>Asymetria zakresu</th></tr>${fullRows}</table>`:''}
+    ${measTbl?`<h3>Pomiary punktowe</h3>${measTbl}`:''}
+    ${cmp}
+    ${chartImg?`<h3>Przebieg kątów</h3>${chartImg}`:''}
+    ${imgs.length?`<h3>Dokumentacja zdjęciowa</h3><div class="imgs">${imgs.join('')}</div>`:''}
+    ${notes?`<h3>Wnioski i zalecenia</h3><div class="note">${esc(notes)}</div>`:''}
+    <p class="disc">Pomiar wykonano metodą markerless (analiza obrazu 2D z jednej kamery, model MediaPipe Pose). Wartości są orientacyjne i mogą różnić się od pomiaru goniometrem o kilka stopni, zwłaszcza gdy ruch nie przebiega prostopadle do kamery. Raport nie stanowi diagnozy medycznej. Asymetria &gt; 15% oznaczona ⚠. Normy: AAOS, Bennell i in. (1998), Lunsford i Perry (1995), literatura dot. FPPA.</p>
+    <p class="disc" style="margin-top:4px">BikeRc · wygenerowano ${new Date().toLocaleString('pl-PL')}</p>`;
+}
+$('#genReport').onclick = () => { if(recording) toggleRec(); buildReport(); };
+$('#printBtn').onclick = () => { if(!$('#report .rh')) buildReport(); window.print(); };
+
+/* ---------- eksport ---------- */
+function download(name, text, type){ const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([text],{type})); a.download=name; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),2000); }
+const fname = ext => `bikerc-rehab-${(patient().name||'pacjent').replace(/\s+/g,'_')}-${new Date().toISOString().slice(0,16).replace(/[:T]/g,'-')}.${ext}`;
+$('#csvBtn').onclick = () => {
+  if(!lastSession){ toast('Brak nagranej sesji.'); return; }
+  const cols = []; for(const k in METRICS) for(const s of sidesOf(k)) cols.push([k,s]);
+  const head = ['czas_s', ...cols.map(([k,s])=>`${k}_${s==='L'?'lewa':s==='R'?'prawa':'wartosc'}`)].join(';');
+  const rows = lastSession.samples.map(d => [d.t.toFixed(3), ...cols.map(([k,s])=>d[s]?.[k]==null?'':d[s][k].toFixed(1).replace('.',','))].join(';'));
+  download(fname('csv'), '﻿'+[head,...rows].join('\n'), 'text/csv');
+};
+$('#jsonBtn').onclick = () => {
+  if(!lastSession && !measurements.length){ toast('Brak danych.'); return; }
+  const s = lastSession || emptySession();
+  download(fname('json'), JSON.stringify({...histEntry(s), samples:s.samples}, null, 1), 'application/json');
+};
+
+/* ---------- start ---------- */
+buildAllTable(); buildChartSel(); setTest('free'); drawChart();
+if(navigator.mediaDevices?.enumerateDevices) listCams();
+if(location.protocol==='file:') console.info('BikeRc Rehab uruchomione z pliku lokalnego.');
+</script>
+</body>
+</html>
