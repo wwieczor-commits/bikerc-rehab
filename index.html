@@ -239,7 +239,7 @@ nav.tabs button.on{color:var(--accent)}
 #report .note{white-space:pre-wrap;background:#f6f7f9;border-radius:8px;padding:10px}
 #report .disc{font-size:10.5px;color:#7a8594;margin-top:18px}
 #report .cL{color:var(--left-print)} #report .cR{color:var(--right-print)}
-#report .fitsvg{width:100%;max-width:520px;display:block;margin:0 auto 10px}
+#report .fitsvg{width:100%;max-width:560px;display:block;margin:4px auto 12px}
 #report .fit{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
 #report .fitc{border:1px solid #e3e7ec;border-radius:12px;padding:10px 12px;background:#fafbfc}
 #report .fitc .t{font-size:10.5px;text-transform:uppercase;letter-spacing:.8px;color:#7a8594;font-weight:600}
@@ -251,7 +251,7 @@ nav.tabs button.on{color:var(--accent)}
 #report .fitc.ch .v,#report .fitc.ch .w{color:var(--accent-print)}
 #report .fitc.ok .v{color:#166534;font-size:20px}
 #report .fitc.na .v{color:#9aa3ad}
-@media print{ #report .fit{grid-template-columns:repeat(4,1fr)} #report .fitsvg{max-width:420px} }
+@media print{ #report .fit{grid-template-columns:repeat(4,1fr)} #report .fitsvg{max-width:520px} }
 @media (min-width:600px){ #report .kv{grid-template-columns:repeat(3,1fr)} #report .imgs{grid-template-columns:repeat(3,1fr)} #report{padding:28px} }
 
 @media print{
@@ -1438,36 +1438,98 @@ function fitPlan(sess){
 }
 
 function fitVisual(plan){
-  const A = 'var(--accent-print)', G = '#9aa3ad', OK = 3;
+  const A = 'var(--accent-print)', OK = 3;
+  const FR = '#4b5563', TY = '#2b2a2a', RIM = '#a7afb8', PART = '#6b7280', SAD = '#374151', FADE = '#c9ced4';
   const cm = mm => (Math.abs(mm)/10).toFixed(1).replace('.',',') + ' cm';
   const ch = o => o.has && Math.abs(o.mm) >= OK;
-  const K = mm => Math.max(-28, Math.min(28, mm*0.55));            // przesunięcia na rysunku powiększone
+  const K = mm => Math.max(-30, Math.min(30, mm*0.6));             // przesunięcia na rysunku powiększone
   const sx = ch(plan.saddleX) ? K(plan.saddleX.mm) : 0, sy = ch(plan.saddleH) ? -K(plan.saddleH.mm) : 0;
   const bx = ch(plan.barX) ? K(plan.barX.mm) : 0,       by = ch(plan.barH) ? -K(plan.barH.mm) : 0;
-  const saddle = `<path d="M138 80 q4 -8 22 -8 h38 q7 0 2 6 q-20 5 -62 2z"/>`;
-  const bars = `<path d="M300 97 L324 91" stroke-width="5" fill="none"/><path d="M324 91 q18 3 12 26 q-4 11 -15 8" stroke-width="4" fill="none"/>`;
-  const arrow = (x1,y1,x2,y2) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" style="stroke:${A}" stroke-width="3" marker-end="url(#fitArrow)"/>`;
-  const txt = (x,y,t,anchor='middle') => `<text x="${x}" y="${y}" text-anchor="${anchor}" font-size="12" font-weight="700" style="fill:${A}">${t}</text>`;
+  const sMove = sx || sy, bMove = bx || by;
+
+  // rower szosowy, widok z boku, jazda w prawo
+  const R = {x:112, y:206}, F = {x:372, y:206}, BB = {x:228, y:210};
+  const wheel = c => {
+    let sp = '';
+    for(let i=0;i<16;i++){ const a = i*Math.PI/8; sp += `<line x1="${c.x}" y1="${c.y}" x2="${(c.x+52*Math.cos(a)).toFixed(1)}" y2="${(c.y+52*Math.sin(a)).toFixed(1)}"/>`; }
+    return `<g stroke="#d5dae0" stroke-width=".8">${sp}</g>
+      <circle cx="${c.x}" cy="${c.y}" r="53" fill="none" stroke="${RIM}" stroke-width="3"/>
+      <circle cx="${c.x}" cy="${c.y}" r="59" fill="none" stroke="${TY}" stroke-width="7"/>
+      <circle cx="${c.x}" cy="${c.y}" r="5" fill="${PART}"/>`;
+  };
+  const saddle = (fill, stroke) => `<path d="M170 74 C182 65 216 65 240 69 C249 70 249 76 240 77 C216 79 192 81 172 80 C163 79 163 75 170 74 Z" fill="${fill}" stroke="${stroke}" stroke-width="1.5"/>
+      <path d="M190 80 L214 79" stroke="${stroke==='#fff'?fill:SAD}" stroke-width="2"/>`;
+  const bars = col => `<g fill="none" stroke="${col}" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M337 103 L338 95" stroke-width="7"/>
+      <path d="M337 96 L366 90" stroke-width="6"/>
+      <path d="M366 90 C388 88 396 97 394 114 C392 130 382 136 369 133" stroke-width="5"/>
+      <path d="M383 90 C390 92 393 97 393 104" stroke-width="8" opacity=".55"/>
+    </g>`;
+  const arrow = (x1,y1,x2,y2) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" style="stroke:${A}" stroke-width="3.5" stroke-linecap="round" marker-end="url(#fitArrow)"/>`;
+  const txt = (x,y,t,anchor='middle') => `<text x="${x}" y="${y}" text-anchor="${anchor}" font-size="14" font-weight="800" style="fill:${A}" paint-order="stroke" stroke="#fff" stroke-width="4">${t}</text>`;
   let ann = '';
-  if(sy) ann += arrow(122, 76, 122, 76 + (sy<0?-30:30)) + txt(118, sy<0?38:122, (plan.saddleH.mm>0?'+':'−')+cm(plan.saddleH.mm), 'end');
-  if(sx) ann += arrow(168, 54, 168 + (sx>0?34:-34), 54) + txt(168, 44, (plan.saddleX.mm>0?'→ ':'← ')+cm(plan.saddleX.mm));
-  if(by) ann += arrow(368, 96, 368, 96 + (by<0?-30:30)) + txt(374, by<0?60:144, (plan.barH.mm>0?'+':'−')+cm(plan.barH.mm), 'start');
-  const ay = Math.min(64, 64 + by);   // strzałka zasięgu zawsze nad kierownicą
-  if(bx) ann += arrow(318, ay, 318 + (bx>0?34:-34), ay) + txt(318, ay-10, (plan.barX.mm>0?'→ ':'← ')+cm(plan.barX.mm));
-  const svg = `<svg class="fitsvg" viewBox="0 0 420 250" role="img" aria-label="Schemat zmian ustawienia roweru">
-    <defs><marker id="fitArrow" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0 L10 5 L0 10z" style="fill:${A}"/></marker></defs>
-    <g fill="none" stroke="${G}" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
-      <circle cx="95" cy="180" r="54" stroke-width="3"/><circle cx="330" cy="180" r="54" stroke-width="3"/>
-      <path d="M195 186 L95 180 L176 96 L195 186 L306 124 L300 101 L176 96"/>
-      <path d="M306 124 L330 180"/><path d="M176 96 L171 82"/>
-      <path d="M195 186 L214 210" stroke-width="5"/><path d="M206 210 h16" stroke-width="5"/>
-      <circle cx="195" cy="186" r="7" fill="#fff"/>
+  if(sy) ann += arrow(152, 76, 152, 76 + (sy<0?-30:30));
+  if(sx){ const y = Math.min(52, 52+sy); ann += arrow(206, y, 206 + (sx>0?36:-36), y); }
+  if(by) ann += arrow(440, 102, 440, 102 + (by<0?-30:30));
+  if(bx){ const y = Math.min(70, 70+by), x0 = bx>0 ? 380 : 416; ann += arrow(x0, y, x0 + (bx>0?36:-36), y); }
+
+  // chmurki z opisem zmian
+  const line = (o, what, up, down, icoUp, icoDown) => !o.has ? `<tspan fill="#9aa3ad">${what}: brak danych</tspan>` : ch(o) ? `${o.mm>0?icoUp:icoDown} ${o.mm>0?up:down} o ${cm(o.mm)}` : `<tspan fill="#166534">✓ ${what} bez zmian</tspan>`;
+  const bubble = (x, y, w, title, rows, tx, ty, changed) => {
+    const h = 30 + rows.length*20, col = changed ? '#1fa597' : '#c9ced4';
+    return `<path d="M${tx} ${ty} L${x + w/2} ${y + h}" stroke="${col}" stroke-width="1.5" stroke-dasharray="4 3" fill="none"/>
+      <circle cx="${tx}" cy="${ty}" r="3.5" fill="${col}"/>
+      <rect x="${x}" y="${y}" width="${w}" height="${h}" rx="10" fill="${changed ? '#effaf8' : '#f6f7f9'}" stroke="${col}" stroke-width="1.5"/>
+      <text x="${x+12}" y="${y+19}" font-size="11.5" font-weight="800" letter-spacing="1.2" fill="#5b6676">${title}</text>
+      ${rows.map((r,i)=>`<text x="${x+12}" y="${y+40+i*20}" font-size="14.5" font-weight="800" fill="#1fa597">${r}</text>`).join('')}`;
+  };
+  const sChanged = ch(plan.saddleH) || ch(plan.saddleX), bChanged = ch(plan.barH) || ch(plan.barX);
+  ann += bubble(-24, -66, 214, 'SIODŁO', [line(plan.saddleH,'wysokość','wyżej','niżej','↑','↓'), line(plan.saddleX,'przód/tył','do przodu','do tyłu','→','←')], 205+sx, 66+sy, sChanged);
+  ann += bubble(318, -66, 218, 'KIEROWNICA', [line(plan.barH,'wysokość','wyżej','niżej','↑','↓'), line(plan.barX,'odległość','dalej','bliżej','→','←')], 380+bx, 90+by, bChanged);
+
+  // sylwetka kolarza (obecna pozycja) – dla poglądu
+  const rider = `<g stroke="#e3e7ec" stroke-linecap="round" stroke-linejoin="round" fill="none">
+      <path d="M206 62 L318 30" stroke-width="24"/>
+      <path d="M206 64 L266 146 L248 232" stroke-width="17"/>
+      <path d="M318 32 L350 72 L386 92" stroke-width="10"/>
     </g>
-    <g stroke="${G}" fill="${G}" stroke-linecap="round">${sx||sy ? '' : saddle}${bx||by ? '' : bars}</g>
-    ${sx||sy ? `<g stroke="${G}" fill="${G}" opacity=".35">${saddle}</g><g transform="translate(${sx} ${sy})" style="fill:${A};stroke:${A}" stroke-dasharray="4 3">${saddle}</g>` : ''}
-    ${bx||by ? `<g style="stroke:${G}" opacity=".35" stroke-linecap="round">${bars}</g><g transform="translate(${bx} ${by})" style="stroke:${A}" stroke-linecap="round" stroke-dasharray="5 4">${bars}</g>` : ''}
+    <circle cx="342" cy="6" r="15" fill="#e3e7ec"/>
+    <path d="M326 -2 C334 -14 356 -14 362 0 Z" fill="#d5dae0"/>
+    <path d="M238 236 L262 238" stroke="#d5dae0" stroke-width="7" stroke-linecap="round"/>`;
+
+  const svg = `<svg class="fitsvg" viewBox="-30 -72 570 372" role="img" aria-label="Schemat zmian ustawienia roweru" font-family="inherit">
+    <defs><marker id="fitArrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="4" markerHeight="4" orient="auto"><path d="M0 0 L10 5 L0 10z" style="fill:${A}"/></marker></defs>
+    <line x1="40" y1="268" x2="460" y2="268" stroke="#e3e7ec" stroke-width="2"/>
+    ${wheel(R)}${wheel(F)}
+    ${rider}
+    <!-- napęd -->
+    <g fill="none" stroke="${RIM}" stroke-width="1.6"><path d="M${BB.x} ${BB.y-22} L${R.x} ${R.y-9}"/><path d="M${BB.x} ${BB.y+22} L${R.x} ${R.y+9}"/></g>
+    <circle cx="${R.x}" cy="${R.y}" r="9" fill="none" stroke="${PART}" stroke-width="2.5"/>
+    <circle cx="${BB.x}" cy="${BB.y}" r="22" fill="none" stroke="${PART}" stroke-width="3.5"/>
+    <!-- rama -->
+    <g fill="none" stroke="${FR}" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M${BB.x} ${BB.y} L${R.x} ${R.y}"/>
+      <path d="M${R.x} ${R.y} L208 106"/>
+      <path d="M${BB.x} ${BB.y} L206 98"/>
+      <path d="M206 100 L336 104"/>
+      <path d="M${BB.x} ${BB.y} L341 130"/>
+      <path d="M336 103 L342 132" stroke-width="9"/>
+    </g>
+    <path d="M342 130 Q352 178 ${F.x} ${F.y}" fill="none" stroke="${FR}" stroke-width="5.5" stroke-linecap="round"/>
+    <path d="M206 99 L201 79" stroke="${PART}" stroke-width="5" stroke-linecap="round"/>
+    <!-- korba i pedał -->
+    <path d="M${BB.x} ${BB.y} L250 244" stroke="${SAD}" stroke-width="6" stroke-linecap="round"/>
+    <rect x="240" y="241" width="22" height="6" rx="3" fill="${SAD}"/>
+    <circle cx="${BB.x}" cy="${BB.y}" r="5" fill="#fff" stroke="${SAD}" stroke-width="2"/>
+    <!-- siodło -->
+    ${sMove ? `<g>${saddle(FADE, FADE)}</g><g transform="translate(${sx} ${sy})">${saddle(A.startsWith('var') ? '#1fa597' : A, '#fff')}</g>` : saddle(SAD, SAD)}
+    <!-- kierownica -->
+    ${bMove ? `${bars(FADE)}<g transform="translate(${bx} ${by})">${bars('#1fa597')}</g>` : bars(SAD)}
     ${ann}
-    <text x="210" y="248" text-anchor="middle" font-size="10" fill="#7a8594">kolor = nowa pozycja (przesunięcia na rysunku powiększone)</text>
+    <g font-size="11.5" fill="#5b6676">
+      <rect x="128" y="282" width="14" height="8" rx="2" fill="${sMove||bMove ? FADE : SAD}"/><text x="147" y="290">obecnie</text>
+      ${sMove||bMove ? `<rect x="214" y="282" width="14" height="8" rx="2" fill="#1fa597"/><text x="233" y="290">nowa pozycja (przesunięcia powiększone)</text>` : `<text x="214" y="290">pozycja bez zmian</text>`}
+    </g>
   </svg>`;
   const card = (title, o, pos, neg, posArrow, negArrow, hint) => {
     const c = ch(o);
