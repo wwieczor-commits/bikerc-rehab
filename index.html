@@ -424,7 +424,7 @@ nav.tabs button.on{color:var(--accent)}
           <button class="btn primary" type="button" id="dbSave"><span class="only-rehab">Zapisz pacjenta</span><span class="only-bike">Zapisz zawodnika</span></button>
           <button class="btn" type="button" id="dbNew"><span class="only-rehab">Nowy pacjent</span><span class="only-bike">Nowy zawodnik</span></button>
         </div>
-        <input id="dbSearch" type="search" placeholder="szukaj: nazwisko, telefon…" autocomplete="off">
+        <label><span class="only-rehab">Zapisani pacjenci – szukaj w bazie</span><span class="only-bike">Zapisani zawodnicy – szukaj w bazie</span><input id="dbSearch" type="search" placeholder="wpisz nazwisko lub telefon, żeby zawęzić listę" autocomplete="off"></label>
         <div class="hist" id="dbList"></div>
       </div>
       <p class="msg" id="dbMsg" role="status"></p>
@@ -1480,7 +1480,7 @@ function dbView(){
     const d = o.dane || {}, info = [o.data_urodzenia && new Date(o.data_urodzenia).toLocaleDateString('pl-PL'), o.telefon, mode==='bike' ? d.bModel : d.pDiag].filter(Boolean).join(' · ');
     return `<div class="hi${o.id===DB.curId?' on':''}"><b>${esc(o.imie_nazwisko)}</b>${info?` <span class="muted">· ${esc(info)}</span>`:''}
       <div class="r"><button class="btn small" data-dbopen="${o.id}">Otwórz</button><button class="btn small" data-dbdel="${o.id}">Usuń</button></div></div>`;
-  }).join('') : `<p class="muted" style="font-size:14px;margin:0">${all.length ? 'Nic nie pasuje do wyszukiwania.' : (mode==='bike' ? 'Nie ma jeszcze zapisanych zawodników.' : 'Nie ma jeszcze zapisanych pacjentów.')}</p>`;
+  }).join('') : `<p class="muted" style="font-size:14px;margin:0">${all.length ? `Nic nie pasuje do „${esc(q)}”. Wyczyść pole wyszukiwania, żeby zobaczyć wszystkich (${all.length}).` : (mode==='bike' ? 'Nie ma jeszcze zapisanych zawodników.' : 'Nie ma jeszcze zapisanych pacjentów.')}</p>`;
   $('#dbSess').innerHTML = DB.sessRows.length ? DB.sessRows.map(r => {
     const T = TESTS[r.test];
     return `<div class="hi"><b>${new Date(r.data).toLocaleDateString('pl-PL')}</b> <span class="muted">· ${r.tryb==='bike'?'Bike fitting':'Rehabilitacja'}</span><br>${esc(T?.name||r.test||'')}
