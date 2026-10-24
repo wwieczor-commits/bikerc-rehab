@@ -42,7 +42,7 @@ html,body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font
 body{padding-bottom:calc(var(--tabh) + var(--safe-b) + 12px)}
 button,select,input,textarea{font:inherit;color:inherit}
 /* 16px w polach – Safari nie przybliża wtedy ekranu */
-select,input[type=text],input[type=date],input[type=number],textarea{font-size:16px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;outline:none;width:100%;-webkit-appearance:none;appearance:none}
+select,input[type=text],input[type=date],input[type=number],input[type=tel],input[type=email],input[type=password],input[type=search],textarea{font-size:16px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;outline:none;width:100%;-webkit-appearance:none;appearance:none}
 select{background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);background-position:calc(100% - 18px) 55%,calc(100% - 13px) 55%;background-size:5px 5px;background-repeat:no-repeat;padding-right:32px}
 select:focus,input:focus,textarea:focus{border-color:var(--accent)}
 textarea{min-height:90px;resize:vertical}
@@ -174,6 +174,16 @@ table.m td small{color:var(--muted);font-size:11px}
 .help li{margin-bottom:6px}
 .help b{color:var(--text)}
 .btnrow{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+/* ---------- baza pacjentów / zawodników ---------- */
+.db .who{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;justify-content:space-between;font-size:13px;color:var(--muted)}
+.db .who b{color:var(--text)}
+.db .lnk{background:none;border:0;padding:4px 0;color:var(--accent);font-size:13px;font-weight:600;cursor:pointer}
+.db .cur{font-size:14px;background:var(--accent-soft);border-radius:10px;padding:8px 12px;margin:0}
+.db .msg{font-size:14px;margin:8px 0 0;font-weight:600}
+.db .msg:empty{display:none}
+.db .msg.err{color:var(--bad)} .db .msg.ok{color:var(--ok)}
+.db .hi.on{border-color:var(--accent)}
+.db [hidden]{display:none!important}
 
 /* ---------- dolne menu ---------- */
 nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:30;display:grid;grid-template-columns:repeat(5,1fr);background:rgba(43,42,42,.96);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-top:1px solid var(--line);padding-bottom:var(--safe-b)}
@@ -394,6 +404,31 @@ nav.tabs button.on{color:var(--accent)}
 
   <!-- PACJENT -->
   <section class="page" id="page-patient">
+    <div class="card db" id="db">
+      <h2><span class="only-rehab">Baza pacjentów</span><span class="only-bike">Baza zawodników</span></h2>
+      <p class="muted" id="dbOff" hidden style="font-size:14px;margin:0">Baza nie jest jeszcze podłączona. Dane zostają tylko na tym urządzeniu.</p>
+      <form class="form" id="dbLogin" hidden>
+        <label>E-mail<input id="dbEmail" type="email" autocomplete="username" required></label>
+        <label>Hasło<input id="dbPass" type="password" autocomplete="current-password" required></label>
+        <button class="btn primary" type="submit">Zaloguj</button>
+      </form>
+      <div class="form" id="dbIn" hidden>
+        <div class="who"><span>Zalogowano: <b id="dbUser"></b></span><span><button type="button" class="lnk" id="dbPwToggle">Zmień hasło</button> · <button type="button" class="lnk" id="dbLogout">Wyloguj</button></span></div>
+        <form class="form" id="dbPw" hidden>
+          <label>Nowe hasło<input id="dbPw1" type="password" autocomplete="new-password" minlength="8" required></label>
+          <label>Powtórz nowe hasło<input id="dbPw2" type="password" autocomplete="new-password" minlength="8" required></label>
+          <button class="btn" type="submit">Zapisz nowe hasło</button>
+        </form>
+        <p class="cur" id="dbCur"></p>
+        <div class="btnrow">
+          <button class="btn primary" type="button" id="dbSave"><span class="only-rehab">Zapisz pacjenta</span><span class="only-bike">Zapisz zawodnika</span></button>
+          <button class="btn" type="button" id="dbNew"><span class="only-rehab">Nowy pacjent</span><span class="only-bike">Nowy zawodnik</span></button>
+        </div>
+        <input id="dbSearch" type="search" placeholder="szukaj: nazwisko, telefon…" autocomplete="off">
+        <div class="hist" id="dbList"></div>
+      </div>
+      <p class="msg" id="dbMsg" role="status"></p>
+    </div>
     <div class="card">
       <h2><span class="only-rehab">Pacjent</span><span class="only-bike">Klient / kolarz</span></h2>
       <div class="form">
@@ -401,6 +436,10 @@ nav.tabs button.on{color:var(--accent)}
         <div class="row2">
           <label>Data urodzenia<input type="date" id="pBirth"></label>
           <label class="only-rehab">Strona leczona<select id="pSide"><option value="">—</option><option value="L">Lewa</option><option value="R">Prawa</option><option value="B">Obie</option></select></label>
+        </div>
+        <div class="row2">
+          <label>Telefon<input type="tel" id="pPhone" autocomplete="off"></label>
+          <label>E-mail<input type="email" id="pMail" autocomplete="off"></label>
         </div>
         <label class="only-rehab">Rozpoznanie / uraz<input type="text" id="pDiag" placeholder="np. skręcenie stawu skokowego"></label>
         <label class="only-rehab">Etap rehabilitacji<input type="text" id="pStage" placeholder="np. 6 tydzień po zabiegu"></label>
@@ -413,8 +452,12 @@ nav.tabs button.on{color:var(--accent)}
         <label>Wnioski i zalecenia (do raportu)<textarea id="pNotes"></textarea></label>
       </div>
     </div>
+    <div class="card db" id="dbSessCard" hidden>
+      <h2>Sesje w bazie</h2>
+      <div class="hist" id="dbSess"></div>
+    </div>
     <div class="card">
-      <h2>Historia sesji</h2>
+      <h2>Historia sesji na tym urządzeniu</h2>
       <div class="hist" id="histList"></div>
       <div class="btnrow" style="margin-top:10px">
         <button class="btn small" id="histExport">Eksport historii</button>
@@ -1103,7 +1146,7 @@ function setMode(m, silent){
   document.querySelectorAll('#modeBar button').forEach(b=>b.classList.toggle('on', b.dataset.m===m));
   testSel.innerHTML = Object.entries(TESTS).filter(([k,t]) => (t.mode||'rehab')===m).map(([k,t])=>`<option value="${k}">${t.name}</option>`).join('');
   setTest(m==='bike' ? 'bikeSide' : 'free');
-  saveSettings(); measureHeader();
+  saveSettings(); measureHeader(); dbView();
   if(!silent) toast(m==='bike' ? 'Tryb: Bike fitting' : 'Tryb: Rehabilitacja');
 }
 document.querySelectorAll('#modeBar button').forEach(b => b.onclick = () => { if(b.dataset.m!==mode) setMode(b.dataset.m); });
@@ -1320,14 +1363,14 @@ function openTab(t){
   window.scrollTo(0,0);
   document.querySelectorAll('.page').forEach(x=>x.classList.toggle('on', x.id==='page-'+t));
   if(t==='chart') requestAnimationFrame(()=>drawChart());
-  if(t==='patient') renderHist();
+  if(t==='patient'){ renderHist(); dbView(); }
   if(t==='report' && !$('#report .rh')) buildReport();
 }
 
 /* =========================================================
    PACJENT I HISTORIA
    ========================================================= */
-const pFields = ['pName','pBirth','pSide','pDiag','pStage','pTher','pNotes','bModel','bSaddle','bGoal'];
+const pFields = ['pName','pBirth','pPhone','pMail','pSide','pDiag','pStage','pTher','pNotes','bModel','bSaddle','bGoal'];
 try{ const p = JSON.parse(localStorage.getItem(PATIENT_KEY)||'{}'); pFields.forEach(f=>{ if(p[f]!=null) $('#'+f).value=p[f]; }); }catch(e){}
 pFields.forEach(f => $('#'+f).addEventListener('input', () => {
   try{ localStorage.setItem(PATIENT_KEY, JSON.stringify(Object.fromEntries(pFields.map(x=>[x,$('#'+x).value])))); }catch(e){}
@@ -1344,7 +1387,7 @@ $('#saveHist').onclick = () => {
   if(!sess){ toast('Najpierw nagraj sesję albo zapisz pomiar.'); return; }
   if(!patient().name){ toast(mode==='bike' ? 'Wpisz imię i nazwisko klienta.' : 'Wpisz imię i nazwisko pacjenta.'); openTab('patient'); $('#pName').focus(); return; }
   const a = loadHist().filter(x=>x.id!==sess.id); a.push(histEntry(sess));
-  if(saveHistArr(a)){ toast('Sesja zapisana w historii.'); buildReport(); }
+  if(saveHistArr(a)){ toast('Sesja zapisana w historii.'); buildReport(); dbSaveSession(histEntry(sess)); }
 };
 function renderHist(){
   const a = loadHist().sort((x,y)=>y.date.localeCompare(x.date));
@@ -1370,6 +1413,193 @@ $('#histImport').onchange = async e => {
   }catch(err){ toast('Nieprawidłowy plik.'); }
   e.target.value='';
 };
+
+/* =========================================================
+   BAZA PACJENTÓW I ZAWODNIKÓW (Supabase)
+   Klucz publiczny (publishable / anon) może być w kodzie strony.
+   Dane chroni logowanie i zasady dostępu (RLS) w bazie – patrz supabase.sql.
+   ========================================================= */
+const SB_URL = '';   // np. https://abcdefgh.supabase.co
+const SB_KEY = '';   // Project Settings → API Keys → publishable key
+const DB_LS = 'bikerc_db_session_v1';
+var DB = {sess:null, people:[], curId:null, savedSnap:null, sessRows:[]};
+const dbKind = () => mode==='bike' ? 'zawodnik' : 'pacjent';
+const dbWho = () => mode==='bike' ? 'zawodnika' : 'pacjenta';
+const dbDt = v => v ? new Date(v).toLocaleString('pl-PL',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '';
+function dbMsg(t, kind){ $('#dbMsg').textContent = t||''; $('#dbMsg').className = 'msg' + (kind ? ' '+kind : ''); }
+function dbStore(v){ try{ v ? localStorage.setItem(DB_LS, JSON.stringify(v)) : localStorage.removeItem(DB_LS); }catch(e){} }
+
+async function dbAuth(path, body){
+  const r = await fetch(SB_URL + '/auth/v1/' + path, {method:'POST', headers:{apikey:SB_KEY, 'Content-Type':'application/json'}, body:JSON.stringify(body)});
+  const j = await r.json().catch(() => ({}));
+  if(!r.ok) throw new Error(j.error_description || j.msg || j.message || ('Błąd ' + r.status));
+  return j;
+}
+function dbKeep(j){
+  DB.sess = {access_token:j.access_token, refresh_token:j.refresh_token, expires_at:j.expires_at || (Math.floor(Date.now()/1000) + (j.expires_in||3600)), email:j.user?.email || DB.sess?.email || ''};
+  dbStore(DB.sess);
+}
+async function dbToken(){
+  if(!DB.sess) throw new Error('Zaloguj się ponownie.');
+  if(DB.sess.expires_at - 60 < Date.now()/1000){
+    try{ dbKeep(await dbAuth('token?grant_type=refresh_token', {refresh_token:DB.sess.refresh_token})); }
+    catch(e){ dbLogout(true); throw new Error('Sesja wygasła. Zaloguj się ponownie.'); }
+  }
+  return DB.sess.access_token;
+}
+async function dbApi(table, method, query, body){
+  const r = await fetch(SB_URL + '/rest/v1/' + table + (query||''), {method, headers:{
+    apikey:SB_KEY, Authorization:'Bearer ' + await dbToken(), 'Content-Type':'application/json', Prefer:'return=representation'},
+    body: body ? JSON.stringify(body) : undefined});
+  const j = await r.json().catch(() => null);
+  if(r.status === 401){ dbLogout(true); throw new Error('Sesja wygasła. Zaloguj się ponownie.'); }
+  if(!r.ok) throw new Error((j && (j.message || j.hint)) || ('Błąd bazy ' + r.status));
+  return j;
+}
+
+const dbForm = () => Object.fromEntries(pFields.map(f => [f, $('#'+f).value]));
+const dbSnap = () => JSON.stringify(dbForm());
+const dbCur = () => DB.people.find(x => x.id === DB.curId);
+function dbView(){
+  if(!DB || !$('#db')) return;
+  const on = !!DB.sess;
+  // pacjent i zawodnik to osobne karty – po zmianie trybu otwarta karta innego rodzaju się zamyka
+  if(dbCur() && dbCur().rodzaj !== dbKind()){ DB.curId = null; DB.savedSnap = null; DB.sessRows = []; }
+  $('#dbOff').hidden = !!SB_KEY;
+  $('#dbLogin').hidden = !SB_KEY || on;
+  $('#dbIn').hidden = !SB_KEY || !on;
+  $('#dbSessCard').hidden = !on || !DB.curId;
+  if(!on) return;
+  $('#dbUser').textContent = DB.sess.email;
+  const c = dbCur();
+  $('#dbCur').textContent = c ? `Otwarta karta: ${c.imie_nazwisko} (zapisana ${dbDt(c.zmieniono)})` : `Nowy ${mode==='bike'?'zawodnik':'pacjent'}, jeszcze niezapisany w bazie.`;
+  const q = $('#dbSearch').value.trim().toLowerCase();
+  const all = DB.people.filter(o => o.rodzaj === dbKind());
+  const rows = all.filter(o => !q || [o.imie_nazwisko, o.telefon, o.email, ...Object.values(o.dane||{})].join(' ').toLowerCase().includes(q));
+  $('#dbList').innerHTML = rows.length ? rows.map(o => {
+    const d = o.dane || {}, info = [o.data_urodzenia && new Date(o.data_urodzenia).toLocaleDateString('pl-PL'), o.telefon, mode==='bike' ? d.bModel : d.pDiag].filter(Boolean).join(' · ');
+    return `<div class="hi${o.id===DB.curId?' on':''}"><b>${esc(o.imie_nazwisko)}</b>${info?` <span class="muted">· ${esc(info)}</span>`:''}
+      <div class="r"><button class="btn small" data-dbopen="${o.id}">Otwórz</button><button class="btn small" data-dbdel="${o.id}">Usuń</button></div></div>`;
+  }).join('') : `<p class="muted" style="font-size:14px;margin:0">${all.length ? 'Nic nie pasuje do wyszukiwania.' : (mode==='bike' ? 'Nie ma jeszcze zapisanych zawodników.' : 'Nie ma jeszcze zapisanych pacjentów.')}</p>`;
+  $('#dbSess').innerHTML = DB.sessRows.length ? DB.sessRows.map(r => {
+    const T = TESTS[r.test];
+    return `<div class="hi"><b>${new Date(r.data).toLocaleDateString('pl-PL')}</b> <span class="muted">· ${r.tryb==='bike'?'Bike fitting':'Rehabilitacja'}</span><br>${esc(T?.name||r.test||'')}
+      <div class="r"><button class="btn small" data-dbrep="${r.id}">Raport</button><button class="btn small" data-dbsdel="${r.id}">Usuń</button></div></div>`;
+  }).join('') : '<p class="muted" style="font-size:14px;margin:0">Brak sesji. „Zapisz w historii” w zakładce Raport zapisuje sesję też tutaj.</p>';
+}
+
+async function dbLoad(){
+  try{ DB.people = await dbApi('osoby', 'GET', '?select=*&order=zmieniono.desc') || []; dbView(); if(DB.curId) dbLoadSess(); }
+  catch(e){ dbMsg(e.message, 'err'); }
+}
+async function dbLoadSess(){
+  if(!DB.curId){ DB.sessRows = []; dbView(); return; }
+  try{ DB.sessRows = await dbApi('sesje', 'GET', '?select=*&osoba_id=eq.' + encodeURIComponent(DB.curId) + '&order=data.desc') || []; dbView(); }
+  catch(e){ dbMsg(e.message, 'err'); }
+}
+function dbFill(o){
+  const d = o ? o.dane || {} : {};
+  pFields.forEach(f => { $('#'+f).value = d[f] ?? ''; });
+  try{ localStorage.setItem(PATIENT_KEY, JSON.stringify(dbForm())); }catch(e){}
+  DB.curId = o ? o.id : null; DB.savedSnap = o ? dbSnap() : null; DB.sessRows = [];
+  dbView(); if(o) dbLoadSess();
+}
+const dbDirty = () => DB.savedSnap !== null ? dbSnap() !== DB.savedSnap : !!$('#pName').value.trim();
+
+async function dbSave(quiet){
+  const name = $('#pName').value.trim();
+  if(!name){ dbMsg(`Wpisz imię i nazwisko ${dbWho()}.`, 'err'); $('#pName').focus(); return null; }
+  const row = {imie_nazwisko:name, data_urodzenia:$('#pBirth').value || null, telefon:$('#pPhone').value.trim(), email:$('#pMail').value.trim(), dane:dbForm()};
+  $('#dbSave').disabled = true; if(!quiet) dbMsg('Zapisuję…');
+  try{
+    const r = DB.curId ? await dbApi('osoby', 'PATCH', '?id=eq.' + encodeURIComponent(DB.curId), row) : await dbApi('osoby', 'POST', '', {...row, rodzaj:dbKind()});
+    const o = r && r[0]; if(!o) throw new Error('Nie udało się zapisać. Spróbuj ponownie.');
+    const isNew = DB.curId !== o.id;
+    DB.people = [o, ...DB.people.filter(x => x.id !== o.id)];
+    DB.curId = o.id; DB.savedSnap = dbSnap(); if(isNew) DB.sessRows = [];
+    dbView(); if(!quiet) dbMsg('Zapisano: ' + o.imie_nazwisko + '.', 'ok');
+    return o;
+  }catch(e){ dbMsg(e.message, 'err'); return null; }
+  finally{ $('#dbSave').disabled = false; }
+}
+// wywoływane przy „Zapisz w historii”: dopisuje sesję do karty osoby w bazie
+async function dbSaveSession(entry){
+  if(!DB.sess || !SB_KEY) return;
+  const c = dbCur();
+  // inne nazwisko niż w otwartej karcie = nowa osoba, żeby nie dopisać sesji komuś innemu
+  if(c && c.imie_nazwisko !== $('#pName').value.trim()){ DB.curId = null; DB.savedSnap = null; DB.sessRows = []; }
+  if(!DB.curId || dbDirty()){ if(!await dbSave(true)) return; }
+  const row = {osoba_id:DB.curId, data:entry.date, tryb:entry.mode, test:entry.testKey, dane:entry};
+  try{
+    const old = DB.sessRows.find(r => r.dane?.id === entry.id);
+    const r = old ? await dbApi('sesje', 'PATCH', '?id=eq.' + encodeURIComponent(old.id), row) : await dbApi('sesje', 'POST', '', row);
+    const s = r && r[0]; if(!s) throw new Error('Nie udało się zapisać sesji w bazie.');
+    DB.sessRows = [s, ...DB.sessRows.filter(x => x.id !== s.id)].sort((a,b) => b.data.localeCompare(a.data));
+    dbView(); toast(`Sesja zapisana też w bazie (${dbCur()?.imie_nazwisko || ''}).`);
+  }catch(e){ dbMsg(e.message, 'err'); toast('Nie udało się zapisać w bazie: ' + e.message, 5000); }
+}
+function dbLogout(silent){
+  const t = DB.sess?.access_token;
+  if(t && !silent) fetch(SB_URL + '/auth/v1/logout', {method:'POST', headers:{apikey:SB_KEY, Authorization:'Bearer ' + t}}).catch(() => {});
+  DB.sess = null; dbStore(null); DB.people = []; DB.curId = null; DB.savedSnap = null; DB.sessRows = []; $('#dbPw').hidden = true;
+  dbView();
+}
+
+$('#dbLogin').addEventListener('submit', async e => {
+  e.preventDefault(); dbMsg('Loguję…');
+  try{
+    dbKeep(await dbAuth('token?grant_type=password', {email:$('#dbEmail').value.trim(), password:$('#dbPass').value}));
+    $('#dbPass').value = ''; dbMsg(''); dbView(); dbLoad();
+  }catch(err){ dbMsg(/invalid login credentials/i.test(err.message) ? 'Nieprawidłowy e-mail lub hasło.' : /not confirmed/i.test(err.message) ? 'Konto nie jest potwierdzone (Supabase: Authentication → Users).' : 'Nie udało się zalogować: ' + err.message, 'err'); }
+});
+$('#dbLogout').onclick = () => { dbLogout(false); dbMsg('Wylogowano.', 'ok'); };
+$('#dbPwToggle').onclick = () => { $('#dbPw').hidden = !$('#dbPw').hidden; if(!$('#dbPw').hidden) $('#dbPw1').focus(); };
+$('#dbPw').addEventListener('submit', async e => {
+  e.preventDefault();
+  const a = $('#dbPw1').value, b = $('#dbPw2').value;
+  if(a !== b){ dbMsg('Hasła się różnią. Wpisz to samo hasło dwa razy.', 'err'); return; }
+  dbMsg('Zmieniam hasło…');
+  try{
+    const r = await fetch(SB_URL + '/auth/v1/user', {method:'PUT', headers:{apikey:SB_KEY, Authorization:'Bearer ' + await dbToken(), 'Content-Type':'application/json'}, body:JSON.stringify({password:a})});
+    const j = await r.json().catch(() => ({}));
+    if(!r.ok) throw new Error(/same/i.test(j.msg || j.message || '') ? 'Nowe hasło musi być inne niż obecne.' : (j.msg || j.message || ('Błąd ' + r.status)));
+    $('#dbPw1').value = $('#dbPw2').value = ''; $('#dbPw').hidden = true;
+    dbMsg('Hasło zmienione.', 'ok');
+  }catch(err){ dbMsg(err.message, 'err'); }
+});
+$('#dbSave').onclick = () => dbSave(false);
+$('#dbNew').onclick = () => {
+  if(dbDirty() && !confirm('Bieżąca karta ma niezapisane zmiany. Zacząć nową mimo to?')) return;
+  dbFill(null); dbMsg(''); $('#pName').focus();
+};
+$('#dbSearch').addEventListener('input', dbView);
+$('#dbList').addEventListener('click', async e => {
+  const b = e.target.closest('button'); if(!b) return;
+  const o = DB.people.find(x => x.id === (b.dataset.dbopen || b.dataset.dbdel)); if(!o) return;
+  if(b.dataset.dbopen){
+    if(o.id !== DB.curId && dbDirty() && !confirm('Bieżąca karta ma niezapisane zmiany. Otworzyć inną mimo to?')) return;
+    dbFill(o); dbMsg(''); return;
+  }
+  if(!confirm(`Usunąć „${o.imie_nazwisko}” z bazy razem z sesjami? Tego nie da się cofnąć.`)) return;
+  try{
+    await dbApi('osoby', 'DELETE', '?id=eq.' + encodeURIComponent(o.id));
+    DB.people = DB.people.filter(x => x.id !== o.id);
+    if(DB.curId === o.id){ DB.curId = null; DB.savedSnap = null; DB.sessRows = []; }
+    dbView(); dbMsg('Usunięto z bazy.', 'ok');
+  }catch(err){ dbMsg(err.message, 'err'); }
+});
+$('#dbSess').addEventListener('click', async e => {
+  const b = e.target.closest('button'); if(!b) return;
+  const s = DB.sessRows.find(x => x.id === (b.dataset.dbrep || b.dataset.dbsdel)); if(!s) return;
+  if(b.dataset.dbrep){ buildReport(s.dane, true); openTab('report'); window.scrollTo(0,0); return; }
+  if(!confirm('Usunąć tę sesję z bazy?')) return;
+  try{ await dbApi('sesje', 'DELETE', '?id=eq.' + encodeURIComponent(s.id)); DB.sessRows = DB.sessRows.filter(x => x.id !== s.id); dbView(); }
+  catch(err){ dbMsg(err.message, 'err'); }
+});
+window.addEventListener('beforeunload', e => { if(DB.sess && DB.curId && dbDirty()){ e.preventDefault(); e.returnValue = ''; } });
+if(SB_KEY){ try{ DB.sess = JSON.parse(localStorage.getItem(DB_LS) || 'null'); }catch(e){} }
+if(DB.sess) dbLoad();
+dbView();
 
 /* =========================================================
    RAPORT
