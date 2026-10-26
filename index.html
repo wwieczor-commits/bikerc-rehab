@@ -156,6 +156,7 @@ table.m td small{color:var(--muted);font-size:11px}
 .q{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:4px;vertical-align:middle}
 .mono{font-variant-numeric:tabular-nums}
 .muted{color:var(--muted)}
+.copy{text-align:center;font-size:11.5px;color:var(--muted);opacity:.75;margin:18px 0 4px}
 .chartbox{height:240px;margin-top:8px}
 .chartbox canvas{width:100%;height:100%;display:block}
 .legend{display:flex;gap:12px;font-size:12px;color:var(--muted);flex-wrap:wrap;margin-top:8px}
@@ -520,6 +521,7 @@ nav.tabs button.on{color:var(--accent)}
       <p>Pomiar 2D z jednej kamery – wartości orientacyjne, nie zastępują goniometru ani badania lekarskiego.</p>
     </div>
   </section>
+  <p class="copy">© 2026 Wojciech Wieczorek</p>
 </main>
 
 <nav class="tabs" id="tabs">
@@ -1955,7 +1957,7 @@ function buildReport(h, fromHist){
     ${notes?`<h3>${bike?'Uwagi fittera':'Wnioski i zalecenia'}</h3><div class="note">${esc(notes)}</div>`:''}
     <p class="disc">${bike
       ? 'Pomiar markerless (obraz 2D z jednej kamery, MediaPipe Pose). Kąty z obrotów korby to średnia ± odchylenie standardowe; wartości w mm przeliczone z długości korby. Zakresy docelowe są punktem wyjścia – ostateczna pozycja zależy od mobilności, celów i odczuć kolarza. Krzywizny kręgosłupa nie są mierzone (tylko linia biodro–bark i odcinek szyjny).'
-      : 'Pomiar markerless (obraz 2D z jednej kamery, MediaPipe Pose). Wartości orientacyjne, mogą różnić się od goniometru o kilka stopni. Raport nie stanowi diagnozy medycznej. Asymetria &gt; 15% oznaczona ⚠. Normy: AAOS, Bennell i in. (1998), Lunsford i Perry (1995), literatura FPPA.'}<br>BikeRc · ${new Date().toLocaleString('pl-PL')}</p>`;
+      : 'Pomiar markerless (obraz 2D z jednej kamery, MediaPipe Pose). Wartości orientacyjne, mogą różnić się od goniometru o kilka stopni. Raport nie stanowi diagnozy medycznej. Asymetria &gt; 15% oznaczona ⚠. Normy: AAOS, Bennell i in. (1998), Lunsford i Perry (1995), literatura FPPA.'}<br>BikeRc · ${new Date().toLocaleString('pl-PL')} · © 2026 Wojciech Wieczorek</p>`;
 }
 $('#genReport').onclick = () => { if(recording) toggleRec(); buildReport(); toast('Raport odświeżony.'); };
 $('#printBtn').onclick = () => { if(!$('#report .rh')) buildReport(); setTimeout(()=>window.print(), 50); };

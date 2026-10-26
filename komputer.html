@@ -30,6 +30,7 @@ html,body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font
 button,select,input,textarea{font:inherit;color:inherit}
 a{color:var(--accent)}
 .wrap{max-width:1500px;margin:0 auto;padding:16px}
+.copy{text-align:center;font-size:12px;color:var(--muted);opacity:.75;margin:14px 0 4px}
 
 /* ---------- nagłówek ---------- */
 header.top{display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:12px 16px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#10151c,var(--bg))}
@@ -372,6 +373,7 @@ table.m td small{color:var(--muted)}
       </div>
     </div>
   </div>
+  <p class="copy">© 2026 Wojciech Wieczorek</p>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -1181,7 +1183,7 @@ function buildReport(h, fromHist){
     ${imgs.length?`<h3>Dokumentacja zdjęciowa</h3><div class="imgs">${imgs.join('')}</div>`:''}
     ${notes?`<h3>Wnioski i zalecenia</h3><div class="note">${esc(notes)}</div>`:''}
     <p class="disc">Pomiar wykonano metodą markerless (analiza obrazu 2D z jednej kamery, model MediaPipe Pose). Wartości są orientacyjne i mogą różnić się od pomiaru goniometrem o kilka stopni, zwłaszcza gdy ruch nie przebiega prostopadle do kamery. Raport nie stanowi diagnozy medycznej. Asymetria &gt; 15% oznaczona ⚠. Normy: AAOS, Bennell i in. (1998), Lunsford i Perry (1995), literatura dot. FPPA.</p>
-    <p class="disc" style="margin-top:4px">BikeRc · wygenerowano ${new Date().toLocaleString('pl-PL')}</p>`;
+    <p class="disc" style="margin-top:4px">BikeRc · wygenerowano ${new Date().toLocaleString('pl-PL')} · © 2026 Wojciech Wieczorek</p>`;
 }
 $('#genReport').onclick = () => { if(recording) toggleRec(); buildReport(); };
 $('#printBtn').onclick = () => { if(!$('#report .rh')) buildReport(); window.print(); };
