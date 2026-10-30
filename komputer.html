@@ -220,7 +220,7 @@ table.m td small{color:var(--muted)}
         </div>
         <select id="camSel" title="Wybór kamery"><option value="">Domyślna kamera</option></select>
         <button class="btn primary" id="camBtn">Uruchom kamerę</button>
-        <label class="btn" id="fileBtn" style="display:none">Wczytaj wideo…<input type="file" id="fileIn" accept="video/*" hidden></label>
+        <label class="btn" id="fileBtn" style="display:none">Wczytaj wideo…<input type="file" id="fileIn" accept="video/*,video/quicktime,.mov,.MOV,.mp4,.m4v" hidden></label>
         <span class="sp"></span>
         <label class="f">Model
           <select id="modelSel">
@@ -572,11 +572,21 @@ $('#camBtn').onclick = async () => {
 };
 $('#camSel').onchange = () => { if(stream){ stopCam(); $('#camBtn').click(); } };
 
+// Plik wideo, którego przeglądarka nie umie zdekodować (np. HEVC z iPhone'a w Chrome) – bez tego nic się nie dzieje
+const VIDEO_FAIL_MSG = "Nie da się odtworzyć tego filmu w tej przeglądarce. Filmy z iPhone'a (MOV, HEVC) najpewniej otworzysz w Safari. Na przyszłość: iPhone → Ustawienia → Aparat → Formaty → Najbardziej zgodne.";
+function watchVideoLoad(){
+  let ok = false;
+  const fail = () => { if(ok) return; ok = true; clearTimeout(t); toast(VIDEO_FAIL_MSG, 9000); };
+  const t = setTimeout(fail, 8000);
+  video.onerror = fail;
+  return () => { if(ok) return false; if(!video.videoWidth){ fail(); return false; } ok = true; clearTimeout(t); video.onerror = null; return true; };
+}
 $('#fileIn').onchange = e => {
   const f = e.target.files[0]; if(!f) return;
   stopCam(); video.srcObject = null;
+  const loaded = watchVideoLoad();
   video.src = URL.createObjectURL(f); video.loop = false;
-  video.onloadedmetadata = () => { $('#filebar').classList.add('on'); video.playbackRate=+$('#rate').value; video.currentTime=0; startLoop(); updateFileBar(); };
+  video.onloadedmetadata = () => { if(!loaded()) return; $('#filebar').classList.add('on'); video.playbackRate=+$('#rate').value; video.currentTime=0; startLoop(); updateFileBar(); };
 };
 $('#playBtn').onclick = () => video.paused ? video.play() : video.pause();
 video.onplay = () => $('#playBtn').textContent='❚❚';

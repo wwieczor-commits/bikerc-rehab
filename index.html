@@ -324,7 +324,7 @@ nav.tabs button.on{color:var(--accent)}
     <button class="btn icon" id="flipBtn" title="Przód / tył" aria-label="Przełącz kamerę">
       <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7h-3l-2-3H9L7 7H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1z"/><path d="M9 13a3 3 0 0 1 5-2.2M15 13a3 3 0 0 1-5 2.2"/><path d="M14 9v2h-2M10 17v-2h2"/></svg>
     </button>
-    <label class="btn" id="fileBtn">Wideo z galerii<input type="file" id="fileIn" accept="video/*" hidden></label>
+    <label class="btn" id="fileBtn">Wideo z galerii<input type="file" id="fileIn" accept="video/*,video/quicktime,.mov,.MOV,.mp4,.m4v" hidden></label>
   </div>
   <div class="actions">
     <button class="btn rec" id="recBtn" disabled>● Nagrywaj</button>
@@ -795,6 +795,15 @@ $('#camBtn').onclick = () => {
 };
 $('#flipBtn').onclick = () => { facing = facing==='environment' ? 'user' : 'environment'; toast(facing==='user' ? 'Kamera przednia' : 'Kamera tylna'); if(src==='cam') startCam(); };
 
+// Plik wideo, którego przeglądarka nie umie zdekodować (np. HEVC z iPhone'a w Chrome) – bez tego nic się nie dzieje
+const VIDEO_FAIL_MSG = "Nie da się odtworzyć tego filmu w tej przeglądarce. Filmy z iPhone'a (MOV, HEVC) najpewniej otworzysz w Safari. Na przyszłość: iPhone → Ustawienia → Aparat → Formaty → Najbardziej zgodne.";
+function watchVideoLoad(){
+  let ok = false;
+  const fail = () => { if(ok) return; ok = true; clearTimeout(t); toast(VIDEO_FAIL_MSG, 9000); };
+  const t = setTimeout(fail, 8000);
+  video.onerror = fail;
+  return () => { if(ok) return false; if(!video.videoWidth){ fail(); return false; } ok = true; clearTimeout(t); video.onerror = null; return true; };
+}
 $('#fileIn').onchange = e => {
   const f = e.target.files[0]; if(!f) return;
   if(recording) toggleRec();
@@ -802,8 +811,10 @@ $('#fileIn').onchange = e => {
   fileUrl = URL.createObjectURL(f);
   video.src = fileUrl; video.loop = false; video.muted = true;
   src = 'file'; $('#mirror').checked = false;
+  const loaded = watchVideoLoad();
   video.onloadeddata = () => {
     video.onloadeddata = null;
+    if(!loaded()) return;
     $('#filebar').classList.add('on'); video.playbackRate = +$('#rate').value;
     startLoop(); updateFileBar();
     // Safari pokazuje pierwszą klatkę dopiero po krótkim play/pause
