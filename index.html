@@ -351,25 +351,23 @@ nav.tabs button.on{color:var(--accent)}
       <div class="testdesc" id="testDesc"></div>
     </div>
     <div class="card only-rehab" id="manCard" hidden>
-      <h2>Punkty na nodze</h2>
+      <h2>Stopa</h2>
+      <div class="seg" id="manMode" style="margin-bottom:8px"><button data-m="auto" class="on">Automatycznie</button><button data-m="manual">Punkty ręcznie</button></div>
       <div class="seg" id="manSide"><button data-s="L" class="on">Lewa noga</button><button data-s="R">Prawa noga</button></div>
-      <ol class="manpts" id="manPts">
+      <ol class="manpts" id="manPts" hidden>
         <li><b>Goleń</b> – punkt na goleni, ok. 10–15 cm nad kostką (na linii kości strzałkowej)</li>
         <li><b>Kostka</b> – środek kostki bocznej</li>
         <li><b>Stopa</b> – głowa V kości śródstopia (przy małym palcu)</li>
       </ol>
-      <p class="muted" id="manHint" style="font-size:13px;margin:0 0 8px">Zatrzymaj film i dotknij obrazu w tych trzech miejscach, po kolei.</p>
-      <div class="row2">
-        <button class="btn small" id="manReset">Ustaw punkty od nowa</button>
-        <button class="btn small" id="manAuto">Wykryj automatycznie</button>
-      </div>
+      <p class="muted" id="manHint" style="font-size:13px;margin:8px 0">Wczytaj film – program sam znajdzie goleń i stopę.</p>
+      <button class="btn small" id="manReset" hidden style="width:100%">Ustaw punkty od nowa</button>
       <button class="btn primary" id="manRun" style="width:100%;margin-top:8px">Analizuj cały film</button>
       <div class="manres">
         <div><small>Teraz</small><b class="mono" id="manNow">—</b></div>
         <div><small>Min / maks</small><b class="mono" id="manMM">—</b></div>
         <div><small>Zakres ruchu</small><b class="mono" id="manRom">—</b></div>
       </div>
-      <p class="muted" style="font-size:12px;margin:8px 0 0">Punkty program śledzi sam podczas odtwarzania. Gdy któryś „ucieknie”, zatrzymaj film i przeciągnij go palcem. Najpewniej działa, gdy na tych miejscach są małe kropki zrobione markerem lub naklejki.</p>
+      <p class="muted" id="manTip" style="font-size:12px;margin:8px 0 0">Nagrywaj z boku, telefon nieruchomo, cała stopa i kawałek goleni w kadrze, tło inne niż kolor skóry. Jeśli linie nie leżą na nodze, dotknij obrazu – przejdziesz na punkty ręczne i możesz je poprawić.</p>
     </div>
     <div class="card only-bike">
       <h2>Rower</h2>
@@ -543,7 +541,7 @@ nav.tabs button.on{color:var(--accent)}
         <li>Dobre światło z przodu, jednolite tło, krótkie spodenki, boso lub kontrastowe skarpety.</li>
         <li><b>Chód i bieg:</b> nagraj wideo w aplikacji Aparat (najlepiej 60 kl/s lub zwolnione tempo), potem „Wideo z galerii”.</li>
         <li>Przed testem kostki kliknij <b>Kalibruj pozycję neutralną</b>, gdy pacjent stoi prosto.</li>
-        <li><b>Film z samą stopą</b> (zbliżenie, bez całej sylwetki): wybierz test „Zgięcie stopy – zbliżenie (punkty)”, zatrzymaj film na początku i dotknij obrazu: 1) goleń, 2) kostka boczna, 3) głowa V kości śródstopia. Potem „Analizuj cały film” – dostaniesz kąt w każdej klatce, min/maks i zakres ruchu. Kropki markerem na tych miejscach bardzo pomagają w śledzeniu.</li>
+        <li><b>Film z samą stopą</b> (bez całej sylwetki): wybierz test „Stopa – zgięcie (sama stopa w kadrze)”, wczytaj film i kliknij „Analizuj cały film”. Program sam znajduje goleń i stopę po kolorze skóry i kształcie. Gdy tło jest podobne do skóry, przełącz na „Punkty ręcznie” i dotknij: 1) goleń, 2) kostka boczna, 3) okolica małego palca.</li>
       </ul>
       <h2>Raport jako PDF na iPhonie</h2>
       <p>„PDF / drukuj” → w oknie drukowania kliknij ikonę udostępniania (u góry) → „Zachowaj w Plikach” albo wyślij mailem.</p>
@@ -629,8 +627,8 @@ const TESTS = {
       {m:'ankle', stat:'max', lo:15, label:'Maks. zgięcie grzbietowe', ref:'norma ok. 20° (AAOS)'},
       {m:'ankle', stat:'min', hi:-35, label:'Maks. zgięcie podeszwowe', ref:'norma ok. 40–50° (AAOS)'}
     ]},
-  ankleClose: {name:'Zgięcie stopy – zbliżenie (punkty)', view:'sag', manual:true, primary:['ankle'], peak:{m:'ankle', dir:1},
-    desc:'<b>Do filmu z samą stopą i goleniem</b>, gdy w kadrze nie ma całej sylwetki. Noga bokiem do telefonu. Ustaw 3 punkty (goleń, kostka, stopa), potem „Analizuj cały film” – program poda kąt w każdej klatce i zakres min/maks. 0° = stopa pod kątem prostym do goleni. Kalibracja w pozycji neutralnej jest opcjonalna.',
+  ankleClose: {name:'Stopa – zgięcie (sama stopa w kadrze)', view:'sag', manual:true, primary:['ankle'], peak:{m:'ankle', dir:1},
+    desc:'<b>Do filmu z samą stopą i goleniem</b>, bez całej sylwetki. Noga bokiem do telefonu. Program sam znajduje goleń i stopę – wczytaj film i kliknij „Analizuj cały film”. Dostaniesz kąt w każdej klatce, min/maks i zakres ruchu. 0° = stopa pod kątem prostym do goleni, + w górę, − w dół.',
     norms:[
       {m:'ankle', stat:'max', lo:15, label:'Maks. zgięcie grzbietowe', ref:'norma ok. 20° (AAOS)'},
       {m:'ankle', stat:'min', hi:-35, label:'Maks. zgięcie podeszwowe', ref:'norma ok. 40–50° (AAOS)'}
@@ -1084,7 +1082,7 @@ function grab(maxW=640){
    ========================================================= */
 const MAN_R = 10, MAN_S = 28, MAN_Q = 0.45, MAN_W = 480;
 const MAN_NAMES = ['Goleń', 'Kostka', 'Stopa'];
-let man = {side:'L', P:[], g:null, min:null, max:null, drag:-1}, analyzing = false;
+let man = {mode:'auto', side:'L', P:[], g:null, min:null, max:null, buf:[], drag:-1, at:null}, analyzing = false;
 const manCv = document.createElement('canvas'), manCtx = manCv.getContext('2d', {willReadFrequently:true});
 
 function manGray(){
@@ -1137,10 +1135,106 @@ function manTrackPoint(p, g){
 }
 function manSetTpl(p, g){ p.tpl0 = manPatch(g, p.x*g.k, p.y*g.k); p.tpl = p.tpl0.slice(); p.q = 1; }
 
+/* Automatyczne wykrycie stopy bez całej sylwetki: maska skóry (Cr−Cb, próg Otsu),
+   największy obszar dotykający krawędzi kadru (noga wchodzi z boku), linia środka
+   z pierścieni odległości od miejsca wejścia, narożnik = kostka. Proste dopasowane
+   do goleni i do stopy dają kąt. Zwraca {A,S,F} w pikselach obrazu (w,h) albo null. */
+function footAuto(px, w, h){
+  // „skórność” = Cr − Cb; próg z Otsu, bo światło i tło są różne w każdym filmie
+  const n = w*h, m = new Uint8Array(n), sk = new Int16Array(n), hist = new Float64Array(256);
+  for(let i=0,j=0;i<n;i++,j+=4){
+    const r=px[j], g=px[j+1], b=px[j+2], y=.299*r+.587*g+.114*b;
+    const v = (y>40 && r>g && r>b) ? Math.max(0, Math.min(255, Math.round(r*.6813 - g*.0874 - b*.5937))) : 0;   // = Cr − Cb
+    sk[i] = v; hist[v]++;
+  }
+  let tot=0, sum=0; for(let v=0;v<256;v++){ tot+=hist[v]; sum+=v*hist[v]; }
+  let wb=0, sb=0, bestT=40, bestV=-1;
+  for(let t=0;t<255;t++){ wb+=hist[t]; sb+=t*hist[t]; const wf=tot-wb; if(!wb||!wf) continue; const mb=sb/wb, mf=(sum-sb)/wf, v=wb*wf*(mb-mf)**2; if(v>bestV){ bestV=v; bestT=t; } }
+  const thr = Math.max(40, bestT);
+  for(let i=0;i<n;i++) m[i] = sk[i] > thr ? 1 : 0;
+  // otwarcie + zamknięcie 3x3
+  const morph = (src, keep) => { const o=new Uint8Array(n); for(let y=1;y<h-1;y++) for(let x=1;x<w-1;x++){ let s=0; for(let dy=-1;dy<=1;dy++) for(let dx=-1;dx<=1;dx++) s+=src[(y+dy)*w+x+dx]; o[y*w+x] = keep(s)?1:0; } return o; };
+  let a = morph(m, s=>s>=9); a = morph(a, s=>s>=1); a = morph(a, s=>s>=1); a = morph(a, s=>s>=9);
+  // spójne składowe
+  const lab = new Int32Array(n), q = new Int32Array(n); let best=null, any=null, nl=0;
+  for(let i=0;i<n;i++){ if(!a[i]||lab[i]) continue; nl++; let qh=0, qt=0; q[qt++]=i; lab[i]=nl; let cnt=0, edge=0;
+    while(qh<qt){ const p=q[qh++]; cnt++; const x=p%w, y=(p/w)|0; if(x<=3||y<=3||x>=w-4||y>=h-4) edge++;
+      for(const d of [1,-1,w,-w]){ const t=p+d; if(t<0||t>=n) continue; if(a[t]&&!lab[t]){ lab[t]=nl; q[qt++]=t; } } }
+    if(edge>0 && (!best || cnt>best.cnt)) best={l:nl, cnt};
+    if(!any || cnt>any.cnt) any={l:nl, cnt};
+  }
+  if(!best || best.cnt < n*0.02) best = any;   // cała noga w kadrze – bierzemy największy obszar
+  if(!best || best.cnt < n*0.02) return null;
+  const L = best.l;
+  // wejście nogi: najczęstsza krawędź
+  const sides = {l:[],r:[],t:[],b:[]};
+  for(let y=0;y<h;y++) for(let x=0;x<w;x++){ if(lab[y*w+x]!==L) continue;
+    if(x<=3) sides.l.push([x,y]); if(x>=w-4) sides.r.push([x,y]); if(y<=3) sides.t.push([x,y]); if(y>=h-4) sides.b.push([x,y]); }
+  const es = Object.values(sides).sort((p,q)=>q.length-p.length)[0];
+  let E;
+  if(es.length) E = {x: es.reduce((s,p)=>s+p[0],0)/es.length, y: es.reduce((s,p)=>s+p[1],0)/es.length};
+  else {   // obszar nie dotyka krawędzi: początek = punkt najdalszy od środka
+    let sx=0, sy=0, c=0; for(let i=0;i<n;i++) if(lab[i]===L){ sx+=i%w; sy+=(i/w)|0; c++; }
+    sx/=c; sy/=c; let dm=-1; for(let i=0;i<n;i++) if(lab[i]===L){ const d=Math.hypot(i%w-sx, ((i/w)|0)-sy); if(d>dm){ dm=d; E={x:i%w, y:(i/w)|0}; } }
+  }
+  // najdalszy punkt = palce
+  let dmax=0; const D = new Float32Array(n);
+  for(let i=0;i<n;i++) if(lab[i]===L){ const d=Math.hypot(i%w-E.x, ((i/w)|0)-E.y); D[i]=d; if(d>dmax) dmax=d; }
+  const N = 32, cx=new Float64Array(N), cy=new Float64Array(N), cc=new Float64Array(N);
+  for(let i=0;i<n;i++) if(lab[i]===L){ const k=Math.min(N-1, (D[i]/dmax*N)|0); cx[k]+=i%w; cy[k]+=(i/w)|0; cc[k]++; }
+  const C=[]; for(let k=1;k<N-1;k++) if(cc[k]>3) C.push({x:cx[k]/cc[k], y:cy[k]/cc[k], k});
+  if(C.length < 8) return null;
+  const T = C[C.length-1];
+  // narożnik = najdalej od cięciwy E–T
+  const ex=T.x-E.x, ey=T.y-E.y, el=Math.hypot(ex,ey)||1; let ci=0, cd=-1;
+  C.forEach((p,i)=>{ const d=Math.abs((p.x-E.x)*ey-(p.y-E.y)*ex)/el; if(d>cd){cd=d; ci=i;} });
+  const fit = arr => { const mx=arr.reduce((s,p)=>s+p.x,0)/arr.length, my=arr.reduce((s,p)=>s+p.y,0)/arr.length; let sxx=0,syy=0,sxy=0; for(const p of arr){ sxx+=(p.x-mx)**2; syy+=(p.y-my)**2; sxy+=(p.x-mx)*(p.y-my);} const th=.5*Math.atan2(2*sxy, sxx-syy); return {mx,my,dx:Math.cos(th),dy:Math.sin(th)}; };
+  // pomijamy środki przy krawędzi kadru (noga ucięta) i tuż przy narożniku
+  const dE = p => Math.hypot(p.x-E.x, p.y-E.y), dA = dE(C[ci]), dT = dE(T);
+  const sh = C.filter(p => dE(p) >= .3*dA && dE(p) <= .85*dA), ft = C.filter(p => dE(p) >= dA + .15*(dT-dA));
+  if(sh.length<2 || ft.length<2) return null;
+  const ls=fit(sh), lf=fit(ft);
+  // przecięcie prostych = kostka
+  const det = ls.dx*(-lf.dy) - ls.dy*(-lf.dx);
+  let A;
+  if(Math.abs(det)<1e-3) A = C[ci]; else { const t=((lf.mx-ls.mx)*(-lf.dy) - (lf.my-ls.my)*(-lf.dx))/det; A={x:ls.mx+ls.dx*t, y:ls.my+ls.dy*t}; }
+  const orient = (l, P) => ((P.x-A.x)*l.dx + (P.y-A.y)*l.dy) >= 0 ? {dx:l.dx,dy:l.dy} : {dx:-l.dx,dy:-l.dy};
+  const us = orient(ls, E), uf = orient(lf, T), len = dmax*.35;
+  const S = {x:A.x+us.dx*len, y:A.y+us.dy*len}, F = {x:A.x+uf.dx*len, y:A.y+uf.dy*len};
+  return {A, S, F};
+}
+
+const autoCv = document.createElement('canvas'), autoCtx = autoCv.getContext('2d', {willReadFrequently:true});
+function manAutoFrame(t){
+  const w = video.videoWidth, h = video.videoHeight; if(!w) return;
+  const k = 320/Math.max(w,h), aw = Math.round(w*k), ah = Math.round(h*k);
+  if(autoCv.width!==aw || autoCv.height!==ah){ autoCv.width=aw; autoCv.height=ah; }
+  autoCtx.drawImage(video, 0, 0, aw, ah);
+  const r = footAuto(autoCtx.getImageData(0, 0, aw, ah).data, aw, ah);
+  if(!r){ man.P.forEach(p => p.q = 0); return; }
+  const P = [r.S, r.A, r.F].map(p => ({x:p.x/k, y:p.y/k}));
+  // lekkie wygładzenie między kolejnymi klatkami
+  const a = (man.P.length===3 && man.at!=null && Math.abs(t-man.at) < .3 && man.P[0].q) ? .5 : 1;
+  man.P = P.map((p,i) => man.P.length===3 ? {x:man.P[i].x + a*(p.x-man.P[i].x), y:man.P[i].y + a*(p.y-man.P[i].y), q:1} : {...p, q:1});
+  man.at = t;
+}
+function setManMode(m){
+  man.mode = m;
+  document.querySelectorAll('#manMode button').forEach(x => x.classList.toggle('on', x.dataset.m===m));
+  $('#manPts').hidden = m!=='manual'; $('#manReset').hidden = m!=='manual';
+  if(m==='manual'){ man.g = manGray(); if(man.g) man.P.forEach(p => { manSetTpl(p, man.g); }); }
+  else { man.P = []; man.at = null; lastVidTime = -1; }
+  manResetRange(); manUI();
+}
+document.querySelectorAll('#manMode button').forEach(b => b.onclick = () => { if(b.dataset.m!==man.mode) setManMode(b.dataset.m); });
+
 function manualFrame(t){
-  const g = manGray(); if(!g) return;
-  for(const p of man.P) if(p.tpl) manTrackPoint(p, g);
-  man.g = g;
+  if(man.mode==='auto') manAutoFrame(t);
+  else {
+    const g = manGray(); if(!g) return;
+    for(const p of man.P) if(p.tpl) manTrackPoint(p, g);
+    man.g = g;
+  }
   manCompute(t, true);
 }
 function manAngle(){
@@ -1155,14 +1249,17 @@ function manCompute(t, feed){
   cur = {L:{},R:{},S:{}, raw, vis:raw.vis, near:s, t}; cur[s].ankle = raw[s].ankle==null ? null : raw[s].ankle - (calib[s].ankle||0);
   draw(canvas.width, canvas.height);   // zdjęcie szczytu ma pokazywać aktualne punkty
   if(feed) applyRaw(raw, t);
-  const v = cur[s].ankle;
+  // min/maks z mediany 5 ostatnich klatek – pojedyncza zła klatka nie psuje zakresu
+  if(feed || man.mode==='auto'){ man.buf.push(cur[s].ankle); if(man.buf.length > 5) man.buf.shift(); }
+  const vv = feed || man.mode==='auto' ? man.buf.filter(x=>x!=null).sort((x,y)=>x-y) : [cur[s].ankle].filter(x=>x!=null), v = vv.length >= (feed || man.mode==='auto' ? 3 : 1) ? vv[vv.length>>1] : null;
   if(v!=null){ man.min = man.min==null ? v : Math.min(man.min, v); man.max = man.max==null ? v : Math.max(man.max, v); }
   manUI();
 }
 function manUI(){
   const n = man.P.length;
   document.querySelectorAll('#manPts li').forEach((li,i) => li.classList.toggle('on', i===n));
-  $('#manHint').textContent = n < 3 ? `Dotknij obrazu: punkt ${n+1} – ${MAN_NAMES[n].toLowerCase()}.`
+  $('#manHint').textContent = man.mode==='auto' ? (!src ? 'Wczytaj film – program sam znajdzie goleń i stopę.' : n===3 && man.P[0].q ? 'Stopa znaleziona. Kliknij „Analizuj cały film” albo odtwórz film.' : 'Nie widzę stopy w tej klatce. Sprawdź kadr albo przełącz na „Punkty ręcznie”.')
+    : n < 3 ? `Dotknij obrazu: punkt ${n+1} – ${MAN_NAMES[n].toLowerCase()}.`
     : man.P.some(p => p.q < MAN_Q) ? 'Punkt zgubiony (czerwony) – zatrzymaj film i przeciągnij go na miejsce.'
     : 'Punkty ustawione. Odtwórz film albo kliknij „Analizuj cały film”.';
   const v = cur?.[man.side]?.ankle;
@@ -1170,7 +1267,7 @@ function manUI(){
   $('#manMM').textContent = man.min==null ? '—' : `${fmt(man.min,true)} / ${fmt(man.max,true)}`;
   $('#manRom').textContent = man.min==null ? '—' : `${Math.round(man.max-man.min)}°`;
 }
-function manResetRange(){ man.min = null; man.max = null; }
+function manResetRange(){ man.min = null; man.max = null; man.buf = []; }
 
 function drawManual(w, h, mirror){
   const sc = Math.min(w,h)/720, lw = 4*sc, fs = Math.round(19*sc), font = css('--font'), c = css(man.side==='L' ? '--left' : '--right');
@@ -1210,6 +1307,7 @@ function manPos(e){
 canvas.addEventListener('pointerdown', e => {
   if(!test.manual || !src || analyzing) return;
   e.preventDefault();
+  if(man.mode==='auto'){ if(!video.paused) video.pause(); setManMode('manual'); toast('Punkty ręczne – przeciągnij punkt, który leży źle.'); }
   const p = manPos(e);
   let best = -1, bd = 36*p.sc;
   man.P.forEach((q,i) => { const d = Math.hypot(q.x-p.x, q.y-p.y); if(d < bd){ bd = d; best = i; } });
@@ -1240,22 +1338,6 @@ document.querySelectorAll('#manSide button').forEach(b => b.onclick = () => {
   if(src) manCompute(video.currentTime, false);
 });
 $('#manReset').onclick = () => { man.P = []; manResetRange(); cur = null; if(src) draw(canvas.width, canvas.height); manUI(); };
-$('#manAuto').onclick = () => {
-  if(!src){ toast('Najpierw wczytaj film albo włącz kamerę.'); return; }
-  if(!landmarker){ toast('Model jeszcze się ładuje – spróbuj za chwilę.'); return; }
-  let ts = performance.now(); if(ts<=lastTs) ts=lastTs+1; lastTs=ts;
-  let res; try{ res = landmarker.detectForVideo(video, ts); }catch(e){ console.warn(e); }
-  const lm = res?.landmarks?.[0];
-  const I = IDX[$('#swap').checked ? (man.side==='L'?'R':'L') : man.side], w = video.videoWidth, h = video.videoHeight;
-  const P = lm && [I.knee, I.ank, I.toe].map(i => ({x:lm[i].x*w, y:lm[i].y*h, v:lm[i].visibility ?? 1}));
-  if(!P || P.some(p => p.v < .5)){ toast('Nie widać całej nogi – ustaw punkty ręcznie.', 3500); return; }
-  // punkt na goleni w połowie odległości kolano–kostka (zwykle jest w kadrze)
-  const a = {x:(P[0].x+P[1].x)/2, y:(P[0].y+P[1].y)/2};
-  man.g = manGray(); man.P = [a, P[1], P[2]].map(p => ({x:p.x, y:p.y}));
-  man.P.forEach(p => manSetTpl(p, man.g)); manResetRange();
-  manCompute(video.currentTime, false);
-  toast('Punkty wykryte – sprawdź je i w razie potrzeby przeciągnij.');
-};
 
 function manSeek(t){
   return new Promise(r => {
@@ -1266,12 +1348,12 @@ function manSeek(t){
 $('#manRun').onclick = async () => {
   if(analyzing){ analyzing = false; return; }
   if(src!=='file'){ toast('Analiza całego filmu działa dla wideo z galerii.'); return; }
-  if(man.P.length < 3){ toast('Najpierw ustaw 3 punkty na obrazie.'); return; }
+  if(man.mode==='manual' && man.P.length < 3){ toast('Najpierw ustaw 3 punkty na obrazie.'); return; }
   if(recording) toggleRec();
   video.pause(); analyzing = true; manResetRange();
   $('#manRun').textContent = 'Przerwij analizę'; $('#manRun').classList.remove('primary');
-  const step = 1/30, t0 = video.currentTime, end = video.duration - .01, st = $('#statusTxt').textContent, stc = $('#status').className;
-  for(const p of man.P) if(man.g) manSetTpl(p, man.g);   // wzorzec z klatki, na której ustawiono punkty
+  const step = 1/30, t0 = man.mode==='auto' ? 0 : video.currentTime, end = video.duration - .01, st = $('#statusTxt').textContent, stc = $('#status').className;
+  if(man.mode==='manual') for(const p of man.P) if(man.g) manSetTpl(p, man.g);   // wzorzec z klatki, na której ustawiono punkty
   toggleRec();
   for(let t = t0, i = 0; t <= end && analyzing; t += step, i++){
     await manSeek(t);
@@ -1535,7 +1617,7 @@ function bodyLengths(list, near){
 const nearSide = () => nearCount.L + nearCount.R ? (nearCount.L >= nearCount.R ? 'L' : 'R') : null;
 function makeSession(){
   const near = nearSide();
-  return { id: Date.now(), date: new Date().toISOString(), mode, testKey, view, model: test.manual ? 'punkty' : modelKind,
+  return { id: Date.now(), date: new Date().toISOString(), mode, testKey, view, model: test.manual ? (man.mode==='auto' ? 'stopa-auto' : 'punkty') : modelKind,
     calibrated: Object.values(calib).some(o=>Object.keys(o).length), duration: last(samples).t, frames: samples.length,
     stats: {...computeStats(samples), ...(test.cycles ? cycStats(cycles, near) : {})}, reps: test.rep ? {...reps} : null,
     near, cycles: test.cycles ? cycles.length : null, lengths: test.cycles ? bodyLengths(cycles, near) : null, bike: mode==='bike' ? {type:bikeType, crank:crankMm()} : null,
@@ -2197,7 +2279,7 @@ function buildReport(h, fromHist){
       <div><span>Nagranie</span>${sess.duration?sess.duration.toFixed(1)+' s · '+sess.frames+' kl.':'pomiary punktowe'}</div>
       ${bike && sess.cycles!=null ? `<div><span>Obroty korby</span>${sess.cycles}</div>` : ''}
       ${bike && sess.view==='sag' && sess.near ? `<div><span>Mierzona strona</span>${sess.near==='L'?'lewa':'prawa'} (bliżej kamery)</div>` : ''}
-      <div><span>Model</span>${sess.model==='punkty' ? 'Punkty ustawione ręcznie, śledzenie obrazu' : 'MediaPipe Pose '+sess.model}</div>
+      <div><span>Model</span>${sess.model==='punkty' ? 'Punkty ustawione ręcznie, śledzenie obrazu' : sess.model==='stopa-auto' ? 'Automatyczne wykrycie stopy (kształt i kolor skóry)' : 'MediaPipe Pose '+sess.model}</div>
       ${bike ? '' : `<div><span>Kalibracja 0°</span>${sess.calibrated?'tak':'nie'}</div>`}
       ${sess.reps?`<div><span>Powtórzenia</span>L ${sess.reps.L} · P ${sess.reps.R}</div>`:''}
     </div>
